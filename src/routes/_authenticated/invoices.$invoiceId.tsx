@@ -82,7 +82,9 @@ function InvoiceDetail() {
       if (error) throw error;
     },
     onSuccess: async () => {
+      setAddConfirmOpen(false);
       setItem({ description: "", quantity: "1", unit_price: "" });
+
       toast.success("Line item added.");
       await refresh();
     },
