@@ -3,6 +3,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   AlertTriangle,
   CalendarClock,
+  ClipboardCheck,
   CircleDollarSign,
   Gauge,
   Loader2,
@@ -49,8 +50,15 @@ function DashboardPage() {
   const overview = useQuery({
     queryKey: ["dashboard", from],
     queryFn: async () => {
-      const [customers, plans, upcoming, openInvoices, monthPayments, recentServices] =
-        await Promise.all([
+      const [
+        customers,
+        plans,
+        upcoming,
+        openInvoices,
+        monthPayments,
+        recentServices,
+        todayStops,
+      ] = await Promise.all([
           supabase.from("customers").select("id", { count: "exact", head: true }).eq("active", true),
           supabase
             .from("service_plans")
@@ -86,9 +94,14 @@ function DashboardPage() {
             .eq("status", "completed")
             .order("service_date", { ascending: false })
             .limit(6),
+          supabase
+            .from("service_records")
+            .select("id, status, technician_id")
+            .eq("service_date", from),
         ]);
 
       const invoices = openInvoices.data ?? [];
+      const stops = todayStops.data ?? [];
       return {
         customerCount: customers.count ?? 0,
         planCount: plans.count ?? 0,
@@ -98,6 +111,9 @@ function DashboardPage() {
         overdue: invoices.filter((i) => i.status === "overdue"),
         collectedThisMonth: (monthPayments.data ?? []).reduce((s, p) => s + num(p.amount), 0),
         recentServices: recentServices.data ?? [],
+        todayTotal: stops.length,
+        todayDone: stops.filter((s) => s.status === "completed").length,
+        todayUnassigned: stops.filter((s) => !s.technician_id).length,
       };
     },
   });
@@ -183,6 +199,23 @@ function DashboardPage() {
           label="Collected this month"
           value={overview.isLoading ? "…" : money(d?.collectedThisMonth)}
           to="/payments"
+        />
+      </div>
+
+      <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <StatCard
+          icon={ClipboardCheck}
+          label="Stops today"
+          value={overview.isLoading ? "…" : `${d?.todayDone ?? 0}/${d?.todayTotal ?? 0}`}
+          hint="Completed vs. scheduled"
+          to="/my-day"
+        />
+        <StatCard
+          icon={CalendarClock}
+          label="Unassigned today"
+          value={overview.isLoading ? "…" : String(d?.todayUnassigned ?? 0)}
+          hint="Stops without a technician"
+          to="/schedule"
         />
       </div>
 
@@ -306,7 +339,7 @@ function StatCard({
   label: string;
   value: string;
   hint?: string;
-  to: "/customers" | "/service-plans" | "/invoices" | "/payments";
+  to: "/customers" | "/service-plans" | "/invoices" | "/payments" | "/schedule" | "/my-day";
 }) {
   return (
     <Link to={to} className="panel block p-4 transition-colors hover:bg-accent/30">

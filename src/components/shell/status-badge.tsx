@@ -25,6 +25,8 @@ const TONES: Record<string, Tone> = {
   overdue: "danger",
   void: "muted",
   scheduled: "info",
+  en_route: "warning",
+  in_progress: "info",
   completed: "success",
   cancelled: "muted",
   skipped: "warning",
