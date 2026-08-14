@@ -61,9 +61,7 @@ function InvoicesPage() {
       <InvoiceDialog
         open={createOpen}
         onOpenChange={setCreateOpen}
-        onCreated={(id) =>
-          void navigate({ to: "/invoices/$invoiceId", params: { invoiceId: id } })
-        }
+        onCreated={(id) => void navigate({ to: "/invoices/$invoiceId", params: { invoiceId: id } })}
       />
 
       <div className="panel overflow-hidden">

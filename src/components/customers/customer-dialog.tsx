@@ -104,8 +104,9 @@ export function CustomerDialog({
     onError: (e) => toast.error(friendlyError(e, "We couldn't save that customer.")),
   });
 
-  const set = (key: keyof typeof EMPTY) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
-    setForm((f) => ({ ...f, [key]: e.target.value }));
+  const set =
+    (key: keyof typeof EMPTY) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+      setForm((f) => ({ ...f, [key]: e.target.value }));
 
   function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -165,7 +166,11 @@ export function CustomerDialog({
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="billing_state">State</Label>
-              <Input id="billing_state" value={form.billing_state} onChange={set("billing_state")} />
+              <Input
+                id="billing_state"
+                value={form.billing_state}
+                onChange={set("billing_state")}
+              />
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="billing_zip">ZIP</Label>

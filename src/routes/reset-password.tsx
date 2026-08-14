@@ -63,9 +63,7 @@ function ResetPassword() {
           AquaLedger
         </span>
         <h1 className="text-2xl font-semibold tracking-tight">Choose a new password</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Enter a new password for your account.
-        </p>
+        <p className="mt-1 text-sm text-muted-foreground">Enter a new password for your account.</p>
         <form onSubmit={onSubmit} className="mt-6 space-y-4">
           <div className="space-y-1.5">
             <Label htmlFor="password">New password</Label>

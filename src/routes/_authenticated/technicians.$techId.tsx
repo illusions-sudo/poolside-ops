@@ -170,10 +170,7 @@ function TechnicianDetailPage() {
             </div>
             <StatBox label="Assigned plans" value={String(d.plans.length)} />
             <StatBox label="Completed visits" value={String(d.completedCount)} />
-            <StatBox
-              label="Avg visit time"
-              value={d.avgMinutes ? `${d.avgMinutes} min` : "—"}
-            />
+            <StatBox label="Avg visit time" value={d.avgMinutes ? `${d.avgMinutes} min` : "—"} />
           </div>
 
           <section className="panel mt-6">
@@ -193,9 +190,7 @@ function TechnicianDetailPage() {
                     </div>
                     <span className="text-xs text-muted-foreground">
                       {p.preferred_day === null ? "Any day" : DAY_LABELS[p.preferred_day]}
-                      {p.preferred_window_start
-                        ? ` · ${clockTime(p.preferred_window_start)}`
-                        : ""}
+                      {p.preferred_window_start ? ` · ${clockTime(p.preferred_window_start)}` : ""}
                     </span>
                     <span className="num text-sm font-medium">{money(p.price)}</span>
                     <StatusBadge status={p.status} />

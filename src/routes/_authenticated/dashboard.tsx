@@ -60,51 +60,51 @@ function DashboardPage() {
         todayStops,
         balances,
       ] = await Promise.all([
-          supabase.from("customers").select("id", { count: "exact", head: true }).eq("active", true),
-          supabase
-            .from("service_plans")
-            .select("id", { count: "exact", head: true })
-            .eq("status", "active"),
-          supabase
-            .from("service_records")
-            .select(
-              "id, service_date, status, customers(first_name, last_name, company_name), properties(address, city)",
-            )
-            .gte("service_date", from)
-            .lte("service_date", to)
-            .order("service_date", { ascending: true })
-            .limit(8),
-          supabase
-            .from("invoices")
-            .select(
-              "id, invoice_number, status, due_date, amount_due, total, customers(first_name, last_name, company_name)",
-            )
-            .in("status", ["sent", "partially_paid", "overdue"])
-            .order("due_date", { ascending: true })
-            .limit(50),
-          supabase
-            .from("payments")
-            .select("amount")
-            .eq("status", "completed")
-            .gte("payment_date", monthStart()),
-          supabase
-            .from("service_records")
-            .select(
-              "id, service_date, status, customers(first_name, last_name, company_name), properties(address)",
-            )
-            .eq("status", "completed")
-            .order("service_date", { ascending: false })
-            .limit(6),
-          supabase
-            .from("service_records")
-            .select("id, status, technician_id")
-            .eq("service_date", from),
-          // Full receivables total, independent of the capped list shown below.
-          supabase
-            .from("invoices")
-            .select("amount_due")
-            .in("status", ["sent", "partially_paid", "overdue"]),
-        ]);
+        supabase.from("customers").select("id", { count: "exact", head: true }).eq("active", true),
+        supabase
+          .from("service_plans")
+          .select("id", { count: "exact", head: true })
+          .eq("status", "active"),
+        supabase
+          .from("service_records")
+          .select(
+            "id, service_date, status, customers(first_name, last_name, company_name), properties(address, city)",
+          )
+          .gte("service_date", from)
+          .lte("service_date", to)
+          .order("service_date", { ascending: true })
+          .limit(8),
+        supabase
+          .from("invoices")
+          .select(
+            "id, invoice_number, status, due_date, amount_due, total, customers(first_name, last_name, company_name)",
+          )
+          .in("status", ["sent", "partially_paid", "overdue"])
+          .order("due_date", { ascending: true })
+          .limit(50),
+        supabase
+          .from("payments")
+          .select("amount")
+          .eq("status", "completed")
+          .gte("payment_date", monthStart()),
+        supabase
+          .from("service_records")
+          .select(
+            "id, service_date, status, customers(first_name, last_name, company_name), properties(address)",
+          )
+          .eq("status", "completed")
+          .order("service_date", { ascending: false })
+          .limit(6),
+        supabase
+          .from("service_records")
+          .select("id, status, technician_id")
+          .eq("service_date", from),
+        // Full receivables total, independent of the capped list shown below.
+        supabase
+          .from("invoices")
+          .select("amount_due")
+          .in("status", ["sent", "partially_paid", "overdue"]),
+      ]);
 
       const invoices = openInvoices.data ?? [];
       const stops = todayStops.data ?? [];
@@ -165,11 +165,7 @@ function DashboardPage() {
                   <Link to="/customers">Add your first customer</Link>
                 </Button>
                 {isAdmin ? (
-                  <Button
-                    variant="outline"
-                    onClick={() => seed.mutate()}
-                    disabled={seed.isPending}
-                  >
+                  <Button variant="outline" onClick={() => seed.mutate()} disabled={seed.isPending}>
                     {seed.isPending ? <Loader2 className="mr-2 size-4 animate-spin" /> : null}
                     Load sample data
                   </Button>
@@ -229,7 +225,10 @@ function DashboardPage() {
         <section className="panel">
           <header className="flex items-center justify-between border-b border-border px-4 py-3">
             <h2 className="font-display text-sm font-semibold">Next 7 days</h2>
-            <Link to="/service-history" className="text-xs font-medium text-primary hover:underline">
+            <Link
+              to="/service-history"
+              className="text-xs font-medium text-primary hover:underline"
+            >
               Service history
             </Link>
           </header>

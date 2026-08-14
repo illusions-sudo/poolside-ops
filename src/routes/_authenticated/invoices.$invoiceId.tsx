@@ -48,6 +48,7 @@ function InvoiceDetail() {
   const [deleteItemId, setDeleteItemId] = useState<string | null>(null);
   const [deletePaymentId, setDeletePaymentId] = useState<string | null>(null);
   const [item, setItem] = useState({ description: "", quantity: "1", unit_price: "" });
+  const [addConfirmOpen, setAddConfirmOpen] = useState(false);
 
   const invoice = useQuery({
     queryKey: ["invoice", invoiceId],
@@ -80,7 +81,9 @@ function InvoiceDetail() {
       if (error) throw error;
     },
     onSuccess: async () => {
+      setAddConfirmOpen(false);
       setItem({ description: "", quantity: "1", unit_price: "" });
+
       toast.success("Line item added.");
       await refresh();
     },
@@ -152,7 +155,10 @@ function InvoiceDetail() {
   const inv = invoice.data;
   const isDraft = inv.status === "draft";
   const isVoid = inv.status === "void";
-  const canEditItems = isAdmin && !isVoid;
+  // A fully paid invoice is locked; a partially paid one asks for confirmation.
+  const isPaid = inv.status === "paid";
+  const isPartiallyPaid = inv.status === "partially_paid";
+  const canEditItems = isAdmin && !isVoid && !isPaid;
   const canPay = isAdmin && !isDraft && !isVoid && num(inv.amount_due) > 0;
 
   return (
@@ -172,7 +178,11 @@ function InvoiceDetail() {
               </Button>
             ) : null}
             {isAdmin && isDraft ? (
-              <Button size="sm" onClick={() => setStatus.mutate("sent")} disabled={setStatus.isPending}>
+              <Button
+                size="sm"
+                onClick={() => setStatus.mutate("sent")}
+                disabled={setStatus.isPending}
+              >
                 {setStatus.isPending ? (
                   <Loader2 className="mr-1.5 size-4 animate-spin" />
                 ) : (
@@ -181,7 +191,11 @@ function InvoiceDetail() {
                 Mark as sent
               </Button>
             ) : null}
-            {canPay ? <Button size="sm" onClick={() => setPayOpen(true)}>Record payment</Button> : null}
+            {canPay ? (
+              <Button size="sm" onClick={() => setPayOpen(true)}>
+                Record payment
+              </Button>
+            ) : null}
             {isAdmin && !isVoid ? (
               <Button variant="outline" size="sm" onClick={() => setVoidOpen(true)}>
                 <Ban className="mr-1.5 size-4" /> Void
@@ -255,6 +269,10 @@ function InvoiceDetail() {
                   toast.error("Quantity must be greater than zero.");
                   return;
                 }
+                if (isPartiallyPaid) {
+                  setAddConfirmOpen(true);
+                  return;
+                }
                 addItem.mutate();
               }}
             >
@@ -304,7 +322,9 @@ function InvoiceDetail() {
         <div className="space-y-4">
           <div className="panel space-y-2 p-4 text-sm">
             <Row label="Subtotal" value={money(inv.subtotal)} />
-            {num(inv.discount) > 0 ? <Row label="Discount" value={`−${money(inv.discount)}`} /> : null}
+            {num(inv.discount) > 0 ? (
+              <Row label="Discount" value={`−${money(inv.discount)}`} />
+            ) : null}
             <Row label={`Tax (${num(inv.tax_rate)}%)`} value={money(inv.tax)} />
             <Row label="Total" value={money(inv.total)} bold />
             <Row label="Paid" value={money(inv.amount_paid)} />
@@ -370,15 +390,32 @@ function InvoiceDetail() {
         onConfirm={() => setStatus.mutate("void")}
       />
       <ConfirmDialog
+        open={addConfirmOpen}
+        onOpenChange={setAddConfirmOpen}
+        title="This invoice has already received a payment"
+        description="Adding a line item will increase the total and the balance still owed. The change is recorded in the financial audit log."
+        confirmLabel="Add anyway"
+        destructive
+        pending={addItem.isPending}
+        onConfirm={() => addItem.mutate()}
+      />
+      <ConfirmDialog
         open={!!deleteItemId}
         onOpenChange={(o) => !o && setDeleteItemId(null)}
-        title="Remove this line item?"
-        description="The invoice total will be recalculated."
+        title={
+          isPartiallyPaid ? "This invoice has already received a payment" : "Remove this line item?"
+        }
+        description={
+          isPartiallyPaid
+            ? "Removing a line item will lower the total and change the balance still owed. The change is recorded in the financial audit log."
+            : "The invoice total will be recalculated."
+        }
         confirmLabel="Remove"
         destructive
         pending={removeItem.isPending}
         onConfirm={() => deleteItemId && removeItem.mutate(deleteItemId)}
       />
+
       <ConfirmDialog
         open={!!deletePaymentId}
         onOpenChange={(o) => !o && setDeletePaymentId(null)}

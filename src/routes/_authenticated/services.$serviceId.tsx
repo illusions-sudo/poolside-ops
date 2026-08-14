@@ -221,16 +221,14 @@ function ServiceDetailPage() {
                 <Button
                   variant="outline"
                   disabled={!canEdit || setStatus.isPending}
-                  onClick={() => setStatus.mutate(s.status === "completed" ? "in_progress" : "scheduled")}
+                  onClick={() =>
+                    setStatus.mutate(s.status === "completed" ? "in_progress" : "scheduled")
+                  }
                 >
                   Reopen visit
                 </Button>
               ) : (
-                <Button
-                  variant="outline"
-                  disabled={!canEdit}
-                  onClick={() => setSkipOpen(true)}
-                >
+                <Button variant="outline" disabled={!canEdit} onClick={() => setSkipOpen(true)}>
                   <SkipForward className="mr-2 size-4" /> Skip visit
                 </Button>
               )}
@@ -349,7 +347,9 @@ function ServiceDetailPage() {
                     <Row label="Surface" value={s.pools.surface_type ?? "—"} />
                   </dl>
                 ) : (
-                  <p className="mt-2 text-sm text-muted-foreground">No pool linked to this visit.</p>
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    No pool linked to this visit.
+                  </p>
                 )}
                 {s.pools?.special_instructions ? (
                   <p className="mt-3 text-sm text-muted-foreground">
@@ -542,7 +542,12 @@ function Chemistry({
       <header className="flex items-center justify-between border-b border-border px-4 py-3">
         <h2 className="font-display text-sm font-semibold">Water chemistry</h2>
         {canEdit ? (
-          <Button size="sm" variant="outline" disabled={save.isPending} onClick={() => save.mutate()}>
+          <Button
+            size="sm"
+            variant="outline"
+            disabled={save.isPending}
+            onClick={() => save.mutate()}
+          >
             {save.isPending ? <Loader2 className="mr-1.5 size-4 animate-spin" /> : null}
             Save readings
           </Button>
@@ -564,9 +569,7 @@ function Chemistry({
               value={form[f.key] ?? ""}
               onChange={(e) => setForm((prev) => ({ ...prev, [f.key]: e.target.value }))}
             />
-            {f.ideal ? (
-              <p className="text-[11px] text-muted-foreground">Ideal {f.ideal}</p>
-            ) : null}
+            {f.ideal ? <p className="text-[11px] text-muted-foreground">Ideal {f.ideal}</p> : null}
           </div>
         ))}
       </div>
@@ -781,10 +784,7 @@ function Equipment({
 
   const remove = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase
-        .from("service_equipment_observations")
-        .delete()
-        .eq("id", id);
+      const { error } = await supabase.from("service_equipment_observations").delete().eq("id", id);
       if (error) throw error;
     },
     onSuccess: async () => {
@@ -804,7 +804,9 @@ function Equipment({
             <li key={o.id} className="flex items-start gap-3 px-4 py-2.5 text-sm">
               <Wrench className="mt-0.5 size-4 text-muted-foreground" />
               <div className="flex-1">
-                <p className="font-medium">{EQUIPMENT_TYPES[o.equipment_type] ?? o.equipment_type}</p>
+                <p className="font-medium">
+                  {EQUIPMENT_TYPES[o.equipment_type] ?? o.equipment_type}
+                </p>
                 {o.notes ? <p className="text-xs text-muted-foreground">{o.notes}</p> : null}
               </div>
               <StatusBadge
@@ -926,7 +928,12 @@ function Notes({
       <header className="flex items-center justify-between border-b border-border px-4 py-3">
         <h2 className="font-display text-sm font-semibold">Notes</h2>
         {canEdit ? (
-          <Button size="sm" variant="outline" disabled={save.isPending} onClick={() => save.mutate()}>
+          <Button
+            size="sm"
+            variant="outline"
+            disabled={save.isPending}
+            onClick={() => save.mutate()}
+          >
             {save.isPending ? <Loader2 className="mr-1.5 size-4 animate-spin" /> : null}
             Save notes
           </Button>

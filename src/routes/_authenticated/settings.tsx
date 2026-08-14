@@ -10,7 +10,7 @@ import { ROLE_LABELS } from "@/lib/format";
 
 export const Route = createFileRoute("/_authenticated/settings")({
   validateSearch: (search: Record<string, unknown>) => ({
-    tab: typeof search['tab'] === "string" ? (search['tab'] as string) : "company",
+    tab: typeof search["tab"] === "string" ? (search["tab"] as string) : "company",
   }),
   head: () => ({
     meta: [
@@ -71,9 +71,7 @@ function SettingsPage() {
           <Field
             label="Default tax rate"
             value={
-              organization?.default_tax_rate != null
-                ? `${organization.default_tax_rate}%`
-                : "—"
+              organization?.default_tax_rate != null ? `${organization.default_tax_rate}%` : "—"
             }
           />
         </TabsContent>
@@ -94,9 +92,7 @@ function SettingsPage() {
                     {m.first_name} {m.last_name}
                   </td>
                   <td className="px-4 py-3 text-muted-foreground">{m.email}</td>
-                  <td className="px-4 py-3 text-muted-foreground">
-                    {roles.data?.[m.id] ?? "—"}
-                  </td>
+                  <td className="px-4 py-3 text-muted-foreground">{roles.data?.[m.id] ?? "—"}</td>
                 </tr>
               ))}
             </tbody>
