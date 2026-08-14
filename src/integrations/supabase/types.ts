@@ -580,56 +580,565 @@ export type Database = {
           },
         ]
       }
+      route_days: {
+        Row: {
+          created_at: string
+          id: string
+          notes: string | null
+          organization_id: string
+          route_date: string
+          technician_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          organization_id: string
+          route_date: string
+          technician_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          organization_id?: string
+          route_date?: string
+          technician_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "route_days_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "route_days_technician_id_fkey"
+            columns: ["technician_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      route_stops: {
+        Row: {
+          created_at: string
+          id: string
+          organization_id: string
+          position: number
+          route_day_id: string
+          service_record_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          organization_id: string
+          position?: number
+          route_day_id: string
+          service_record_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          organization_id?: string
+          position?: number
+          route_day_id?: string
+          service_record_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "route_stops_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "route_stops_route_day_id_fkey"
+            columns: ["route_day_id"]
+            isOneToOne: false
+            referencedRelation: "route_days"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "route_stops_service_record_id_fkey"
+            columns: ["service_record_id"]
+            isOneToOne: true
+            referencedRelation: "service_records"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      service_audit_log: {
+        Row: {
+          action: string
+          changed_by: string | null
+          changes: Json
+          created_at: string
+          id: string
+          organization_id: string
+          service_record_id: string
+        }
+        Insert: {
+          action: string
+          changed_by?: string | null
+          changes?: Json
+          created_at?: string
+          id?: string
+          organization_id: string
+          service_record_id: string
+        }
+        Update: {
+          action?: string
+          changed_by?: string | null
+          changes?: Json
+          created_at?: string
+          id?: string
+          organization_id?: string
+          service_record_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_audit_log_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_audit_log_service_record_id_fkey"
+            columns: ["service_record_id"]
+            isOneToOne: false
+            referencedRelation: "service_records"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      service_checklist_items: {
+        Row: {
+          completed: boolean
+          completed_at: string | null
+          created_at: string
+          id: string
+          label: string
+          organization_id: string
+          position: number
+          service_record_id: string
+        }
+        Insert: {
+          completed?: boolean
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          label: string
+          organization_id: string
+          position?: number
+          service_record_id: string
+        }
+        Update: {
+          completed?: boolean
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          label?: string
+          organization_id?: string
+          position?: number
+          service_record_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_checklist_items_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_checklist_items_service_record_id_fkey"
+            columns: ["service_record_id"]
+            isOneToOne: false
+            referencedRelation: "service_records"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      service_chemical_usage: {
+        Row: {
+          chemical_name: string
+          created_at: string
+          id: string
+          notes: string | null
+          organization_id: string
+          pool_id: string | null
+          quantity: number
+          recorded_by: string | null
+          service_record_id: string
+          unit: string
+        }
+        Insert: {
+          chemical_name: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          organization_id: string
+          pool_id?: string | null
+          quantity?: number
+          recorded_by?: string | null
+          service_record_id: string
+          unit?: string
+        }
+        Update: {
+          chemical_name?: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          organization_id?: string
+          pool_id?: string | null
+          quantity?: number
+          recorded_by?: string | null
+          service_record_id?: string
+          unit?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_chemical_usage_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_chemical_usage_pool_id_fkey"
+            columns: ["pool_id"]
+            isOneToOne: false
+            referencedRelation: "pools"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_chemical_usage_recorded_by_fkey"
+            columns: ["recorded_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_chemical_usage_service_record_id_fkey"
+            columns: ["service_record_id"]
+            isOneToOne: false
+            referencedRelation: "service_records"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      service_chemistry_readings: {
+        Row: {
+          alkalinity: number | null
+          calcium_hardness: number | null
+          created_at: string
+          cyanuric_acid: number | null
+          free_chlorine: number | null
+          id: string
+          notes: string | null
+          organization_id: string
+          ph: number | null
+          pool_id: string | null
+          reading_date: string
+          recorded_by: string | null
+          salt: number | null
+          service_record_id: string
+          total_chlorine: number | null
+          updated_at: string
+          water_temperature: number | null
+        }
+        Insert: {
+          alkalinity?: number | null
+          calcium_hardness?: number | null
+          created_at?: string
+          cyanuric_acid?: number | null
+          free_chlorine?: number | null
+          id?: string
+          notes?: string | null
+          organization_id: string
+          ph?: number | null
+          pool_id?: string | null
+          reading_date?: string
+          recorded_by?: string | null
+          salt?: number | null
+          service_record_id: string
+          total_chlorine?: number | null
+          updated_at?: string
+          water_temperature?: number | null
+        }
+        Update: {
+          alkalinity?: number | null
+          calcium_hardness?: number | null
+          created_at?: string
+          cyanuric_acid?: number | null
+          free_chlorine?: number | null
+          id?: string
+          notes?: string | null
+          organization_id?: string
+          ph?: number | null
+          pool_id?: string | null
+          reading_date?: string
+          recorded_by?: string | null
+          salt?: number | null
+          service_record_id?: string
+          total_chlorine?: number | null
+          updated_at?: string
+          water_temperature?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_chemistry_readings_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_chemistry_readings_pool_id_fkey"
+            columns: ["pool_id"]
+            isOneToOne: false
+            referencedRelation: "pools"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_chemistry_readings_recorded_by_fkey"
+            columns: ["recorded_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_chemistry_readings_service_record_id_fkey"
+            columns: ["service_record_id"]
+            isOneToOne: false
+            referencedRelation: "service_records"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      service_equipment_observations: {
+        Row: {
+          condition: string
+          created_at: string
+          equipment_type: string
+          id: string
+          notes: string | null
+          organization_id: string
+          pool_id: string | null
+          recorded_by: string | null
+          service_record_id: string
+        }
+        Insert: {
+          condition?: string
+          created_at?: string
+          equipment_type: string
+          id?: string
+          notes?: string | null
+          organization_id: string
+          pool_id?: string | null
+          recorded_by?: string | null
+          service_record_id: string
+        }
+        Update: {
+          condition?: string
+          created_at?: string
+          equipment_type?: string
+          id?: string
+          notes?: string | null
+          organization_id?: string
+          pool_id?: string | null
+          recorded_by?: string | null
+          service_record_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_equipment_observations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_equipment_observations_pool_id_fkey"
+            columns: ["pool_id"]
+            isOneToOne: false
+            referencedRelation: "pools"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_equipment_observations_recorded_by_fkey"
+            columns: ["recorded_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_equipment_observations_service_record_id_fkey"
+            columns: ["service_record_id"]
+            isOneToOne: false
+            referencedRelation: "service_records"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      service_photos: {
+        Row: {
+          caption: string | null
+          created_at: string
+          customer_id: string | null
+          id: string
+          organization_id: string
+          pool_id: string | null
+          property_id: string | null
+          service_record_id: string
+          storage_path: string
+          technician_id: string | null
+        }
+        Insert: {
+          caption?: string | null
+          created_at?: string
+          customer_id?: string | null
+          id?: string
+          organization_id: string
+          pool_id?: string | null
+          property_id?: string | null
+          service_record_id: string
+          storage_path: string
+          technician_id?: string | null
+        }
+        Update: {
+          caption?: string | null
+          created_at?: string
+          customer_id?: string | null
+          id?: string
+          organization_id?: string
+          pool_id?: string | null
+          property_id?: string | null
+          service_record_id?: string
+          storage_path?: string
+          technician_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_photos_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_photos_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_photos_pool_id_fkey"
+            columns: ["pool_id"]
+            isOneToOne: false
+            referencedRelation: "pools"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_photos_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_photos_service_record_id_fkey"
+            columns: ["service_record_id"]
+            isOneToOne: false
+            referencedRelation: "service_records"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_photos_technician_id_fkey"
+            columns: ["technician_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       service_plans: {
         Row: {
           active: boolean
           billing_frequency: string
           created_at: string
+          custom_interval_days: number | null
           customer_id: string
           description: string | null
+          estimated_duration_minutes: number
           frequency: string
           id: string
           next_service_date: string | null
           organization_id: string
           pool_id: string | null
+          preferred_day: number | null
+          preferred_window_end: string | null
+          preferred_window_start: string | null
           price: number
           property_id: string
           service_name: string
           status: string
+          technician_id: string | null
           updated_at: string
         }
         Insert: {
           active?: boolean
           billing_frequency?: string
           created_at?: string
+          custom_interval_days?: number | null
           customer_id: string
           description?: string | null
+          estimated_duration_minutes?: number
           frequency?: string
           id?: string
           next_service_date?: string | null
           organization_id: string
           pool_id?: string | null
+          preferred_day?: number | null
+          preferred_window_end?: string | null
+          preferred_window_start?: string | null
           price?: number
           property_id: string
           service_name: string
           status?: string
+          technician_id?: string | null
           updated_at?: string
         }
         Update: {
           active?: boolean
           billing_frequency?: string
           created_at?: string
+          custom_interval_days?: number | null
           customer_id?: string
           description?: string | null
+          estimated_duration_minutes?: number
           frequency?: string
           id?: string
           next_service_date?: string | null
           organization_id?: string
           pool_id?: string | null
+          preferred_day?: number | null
+          preferred_window_end?: string | null
+          preferred_window_start?: string | null
           price?: number
           property_id?: string
           service_name?: string
           status?: string
+          technician_id?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -661,50 +1170,81 @@ export type Database = {
             referencedRelation: "properties"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "service_plans_technician_id_fkey"
+            columns: ["technician_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
       service_records: {
         Row: {
+          actual_duration_minutes: number | null
+          cancel_reason: string | null
+          completed_at: string | null
           created_at: string
           customer_id: string
           customer_visible_notes: string | null
+          estimated_duration_minutes: number
           id: string
           notes: string | null
           organization_id: string
           pool_id: string | null
           property_id: string
+          scheduled_time: string | null
           service_date: string
           service_plan_id: string | null
+          skip_note: string | null
+          skip_reason: string | null
+          started_at: string | null
           status: string
           technician_id: string | null
           updated_at: string
         }
         Insert: {
+          actual_duration_minutes?: number | null
+          cancel_reason?: string | null
+          completed_at?: string | null
           created_at?: string
           customer_id: string
           customer_visible_notes?: string | null
+          estimated_duration_minutes?: number
           id?: string
           notes?: string | null
           organization_id: string
           pool_id?: string | null
           property_id: string
+          scheduled_time?: string | null
           service_date?: string
           service_plan_id?: string | null
+          skip_note?: string | null
+          skip_reason?: string | null
+          started_at?: string | null
           status?: string
           technician_id?: string | null
           updated_at?: string
         }
         Update: {
+          actual_duration_minutes?: number | null
+          cancel_reason?: string | null
+          completed_at?: string | null
           created_at?: string
           customer_id?: string
           customer_visible_notes?: string | null
+          estimated_duration_minutes?: number
           id?: string
           notes?: string | null
           organization_id?: string
           pool_id?: string | null
           property_id?: string
+          scheduled_time?: string | null
           service_date?: string
           service_plan_id?: string | null
+          skip_note?: string | null
+          skip_reason?: string | null
+          started_at?: string | null
           status?: string
           technician_id?: string | null
           updated_at?: string
@@ -791,6 +1331,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_access_service: { Args: { _service_id: string }; Returns: boolean }
       create_organization: {
         Args: {
           p_first_name?: string
@@ -801,6 +1342,7 @@ export type Database = {
         Returns: string
       }
       current_org_id: { Args: never; Returns: string }
+      generate_service_records: { Args: { p_weeks?: number }; Returns: number }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -810,6 +1352,10 @@ export type Database = {
       }
       is_org_admin: { Args: never; Returns: boolean }
       reset_demo_data: { Args: never; Returns: undefined }
+      save_route_order: {
+        Args: { p_route_day_id: string; p_service_ids: string[] }
+        Returns: undefined
+      }
       seed_demo_data: { Args: never; Returns: undefined }
     }
     Enums: {

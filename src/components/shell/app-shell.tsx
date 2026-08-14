@@ -2,7 +2,10 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import {
   BarChart3,
   CalendarClock,
+  CalendarDays,
+  ClipboardCheck,
   CreditCard,
+  Route as RouteIcon,
   FileText,
   Gauge,
   Home,
@@ -12,6 +15,7 @@ import {
   Search,
   Settings,
   User,
+  UserCog,
   Users,
   Waves,
 } from "lucide-react";
@@ -32,8 +36,12 @@ import { useAuth } from "@/hooks/useAuth";
 import { ROLE_LABELS, initials } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
-const NAV = [
+const ADMIN_NAV = [
   { to: "/dashboard", label: "Dashboard", icon: Home },
+  { to: "/my-day", label: "My Day", icon: ClipboardCheck },
+  { to: "/schedule", label: "Schedule", icon: CalendarDays },
+  { to: "/routes", label: "Routes", icon: RouteIcon },
+  { to: "/technicians", label: "Technicians", icon: UserCog },
   { to: "/customers", label: "Customers", icon: Users },
   { to: "/properties", label: "Properties", icon: MapPin },
   { to: "/service-plans", label: "Service Plans", icon: Gauge },
@@ -44,16 +52,26 @@ const NAV = [
   { to: "/settings", label: "Settings", icon: Settings },
 ] as const;
 
-function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
+const TECH_NAV = [
+  { to: "/my-day", label: "My Day", icon: ClipboardCheck },
+  { to: "/schedule", label: "Schedule", icon: CalendarDays },
+  { to: "/customers", label: "Customers", icon: Users },
+  { to: "/service-history", label: "Service History", icon: CalendarClock },
+  { to: "/settings", label: "Settings", icon: Settings },
+] as const;
+
+type NavItem = { to: string; label: string; icon: typeof Home };
+
+function NavLinks({ items, onNavigate }: { items: readonly NavItem[]; onNavigate?: () => void }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   return (
     <nav className="flex flex-1 flex-col gap-0.5 px-2">
-      {NAV.map((item) => {
+      {items.map((item) => {
         const active = pathname === item.to || pathname.startsWith(`${item.to}/`);
         return (
           <Link
             key={item.to}
-            to={item.to}
+            to={item.to as "/dashboard"}
             onClick={onNavigate}
             className={cn(
               "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
@@ -90,7 +108,8 @@ function Brand({ name }: { name: string }) {
 }
 
 export function AppShell({ children }: { children: ReactNode }) {
-  const { profile, organization, role, signOut } = useAuth();
+  const { profile, organization, role, isAdmin, signOut } = useAuth();
+  const nav: readonly NavItem[] = isAdmin ? ADMIN_NAV : TECH_NAV;
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const orgName = organization?.business_name || organization?.name || "Your company";
@@ -99,7 +118,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     <div className="min-h-screen bg-background">
       <aside className="fixed inset-y-0 left-0 z-30 hidden w-60 flex-col bg-sidebar lg:flex">
         <Brand name={orgName} />
-        <NavLinks />
+        <NavLinks items={nav} />
         <div className="px-4 pb-4 text-[11px] text-sidebar-foreground/50">
           {profile?.email ?? ""}
         </div>
@@ -116,7 +135,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             <SheetContent side="left" className="w-64 border-none bg-sidebar p-0">
               <SheetTitle className="sr-only">Navigation</SheetTitle>
               <Brand name={orgName} />
-              <NavLinks onNavigate={() => setMobileOpen(false)} />
+              <NavLinks items={nav} onNavigate={() => setMobileOpen(false)} />
             </SheetContent>
           </Sheet>
 
@@ -165,7 +184,23 @@ export function AppShell({ children }: { children: ReactNode }) {
           </div>
         </header>
 
-        <main className="mx-auto w-full max-w-[1400px] px-4 py-6 sm:px-6 lg:py-8">{children}</main>
+        <main className="mx-auto w-full max-w-[1400px] px-4 py-6 pb-24 sm:px-6 lg:py-8 lg:pb-8">
+          {children}
+        </main>
+
+        <nav className="fixed inset-x-0 bottom-0 z-20 flex border-t border-border bg-card lg:hidden no-print">
+          {nav.slice(0, 4).map((item) => (
+            <Link
+              key={item.to}
+              to={item.to as "/dashboard"}
+              className="flex flex-1 flex-col items-center gap-1 py-2.5 text-[11px] font-medium text-muted-foreground [&.active]:text-primary"
+              activeProps={{ className: "active" }}
+            >
+              <item.icon className="size-5" />
+              {item.label}
+            </Link>
+          ))}
+        </nav>
       </div>
 
       <GlobalSearch open={searchOpen} onOpenChange={setSearchOpen} />

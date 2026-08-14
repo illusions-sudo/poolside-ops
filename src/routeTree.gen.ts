@@ -14,9 +14,12 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedMyDayRouteImport } from './routes/_authenticated/my-day'
 import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
 import { Route as AuthenticatedPaymentsRouteImport } from './routes/_authenticated/payments'
 import { Route as AuthenticatedReportsRouteImport } from './routes/_authenticated/reports'
+import { Route as AuthenticatedRoutesRouteImport } from './routes/_authenticated/routes'
+import { Route as AuthenticatedScheduleRouteImport } from './routes/_authenticated/schedule'
 import { Route as AuthenticatedServiceHistoryRouteImport } from './routes/_authenticated/service-history'
 import { Route as AuthenticatedServicePlansRouteImport } from './routes/_authenticated/service-plans'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
@@ -26,6 +29,9 @@ import { Route as AuthenticatedInvoicesIndexRouteImport } from './routes/_authen
 import { Route as AuthenticatedInvoicesInvoiceIdRouteImport } from './routes/_authenticated/invoices.$invoiceId'
 import { Route as AuthenticatedPropertiesIndexRouteImport } from './routes/_authenticated/properties.index'
 import { Route as AuthenticatedPropertiesPropertyIdRouteImport } from './routes/_authenticated/properties.$propertyId'
+import { Route as AuthenticatedServicesServiceIdRouteImport } from './routes/_authenticated/services.$serviceId'
+import { Route as AuthenticatedTechniciansIndexRouteImport } from './routes/_authenticated/technicians.index'
+import { Route as AuthenticatedTechniciansTechIdRouteImport } from './routes/_authenticated/technicians.$techId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -51,6 +57,11 @@ const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedMyDayRoute = AuthenticatedMyDayRouteImport.update({
+  id: '/my-day',
+  path: '/my-day',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedOnboardingRoute = AuthenticatedOnboardingRouteImport.update({
   id: '/onboarding',
   path: '/onboarding',
@@ -64,6 +75,16 @@ const AuthenticatedPaymentsRoute = AuthenticatedPaymentsRouteImport.update({
 const AuthenticatedReportsRoute = AuthenticatedReportsRouteImport.update({
   id: '/reports',
   path: '/reports',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedRoutesRoute = AuthenticatedRoutesRouteImport.update({
+  id: '/routes',
+  path: '/routes',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedScheduleRoute = AuthenticatedScheduleRouteImport.update({
+  id: '/schedule',
+  path: '/schedule',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedServiceHistoryRoute =
@@ -119,42 +140,72 @@ const AuthenticatedPropertiesPropertyIdRoute =
     path: '/properties/$propertyId',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedServicesServiceIdRoute =
+  AuthenticatedServicesServiceIdRouteImport.update({
+    id: '/services/$serviceId',
+    path: '/services/$serviceId',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedTechniciansIndexRoute =
+  AuthenticatedTechniciansIndexRouteImport.update({
+    id: '/technicians/',
+    path: '/technicians/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedTechniciansTechIdRoute =
+  AuthenticatedTechniciansTechIdRouteImport.update({
+    id: '/technicians/$techId',
+    path: '/technicians/$techId',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/my-day': typeof AuthenticatedMyDayRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/payments': typeof AuthenticatedPaymentsRoute
   '/reports': typeof AuthenticatedReportsRoute
+  '/routes': typeof AuthenticatedRoutesRoute
+  '/schedule': typeof AuthenticatedScheduleRoute
   '/service-history': typeof AuthenticatedServiceHistoryRoute
   '/service-plans': typeof AuthenticatedServicePlansRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/customers/$customerId': typeof AuthenticatedCustomersCustomerIdRoute
   '/invoices/$invoiceId': typeof AuthenticatedInvoicesInvoiceIdRoute
   '/properties/$propertyId': typeof AuthenticatedPropertiesPropertyIdRoute
+  '/services/$serviceId': typeof AuthenticatedServicesServiceIdRoute
+  '/technicians/$techId': typeof AuthenticatedTechniciansTechIdRoute
   '/customers/': typeof AuthenticatedCustomersIndexRoute
   '/invoices/': typeof AuthenticatedInvoicesIndexRoute
   '/properties/': typeof AuthenticatedPropertiesIndexRoute
+  '/technicians/': typeof AuthenticatedTechniciansIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/my-day': typeof AuthenticatedMyDayRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/payments': typeof AuthenticatedPaymentsRoute
   '/reports': typeof AuthenticatedReportsRoute
+  '/routes': typeof AuthenticatedRoutesRoute
+  '/schedule': typeof AuthenticatedScheduleRoute
   '/service-history': typeof AuthenticatedServiceHistoryRoute
   '/service-plans': typeof AuthenticatedServicePlansRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/customers/$customerId': typeof AuthenticatedCustomersCustomerIdRoute
   '/invoices/$invoiceId': typeof AuthenticatedInvoicesInvoiceIdRoute
   '/properties/$propertyId': typeof AuthenticatedPropertiesPropertyIdRoute
+  '/services/$serviceId': typeof AuthenticatedServicesServiceIdRoute
+  '/technicians/$techId': typeof AuthenticatedTechniciansTechIdRoute
   '/customers': typeof AuthenticatedCustomersIndexRoute
   '/invoices': typeof AuthenticatedInvoicesIndexRoute
   '/properties': typeof AuthenticatedPropertiesIndexRoute
+  '/technicians': typeof AuthenticatedTechniciansIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -163,18 +214,24 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/my-day': typeof AuthenticatedMyDayRoute
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
   '/_authenticated/payments': typeof AuthenticatedPaymentsRoute
   '/_authenticated/reports': typeof AuthenticatedReportsRoute
+  '/_authenticated/routes': typeof AuthenticatedRoutesRoute
+  '/_authenticated/schedule': typeof AuthenticatedScheduleRoute
   '/_authenticated/service-history': typeof AuthenticatedServiceHistoryRoute
   '/_authenticated/service-plans': typeof AuthenticatedServicePlansRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/customers/$customerId': typeof AuthenticatedCustomersCustomerIdRoute
   '/_authenticated/invoices/$invoiceId': typeof AuthenticatedInvoicesInvoiceIdRoute
   '/_authenticated/properties/$propertyId': typeof AuthenticatedPropertiesPropertyIdRoute
+  '/_authenticated/services/$serviceId': typeof AuthenticatedServicesServiceIdRoute
+  '/_authenticated/technicians/$techId': typeof AuthenticatedTechniciansTechIdRoute
   '/_authenticated/customers/': typeof AuthenticatedCustomersIndexRoute
   '/_authenticated/invoices/': typeof AuthenticatedInvoicesIndexRoute
   '/_authenticated/properties/': typeof AuthenticatedPropertiesIndexRoute
+  '/_authenticated/technicians/': typeof AuthenticatedTechniciansIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -183,36 +240,48 @@ export interface FileRouteTypes {
     | '/auth'
     | '/reset-password'
     | '/dashboard'
+    | '/my-day'
     | '/onboarding'
     | '/payments'
     | '/reports'
+    | '/routes'
+    | '/schedule'
     | '/service-history'
     | '/service-plans'
     | '/settings'
     | '/customers/$customerId'
     | '/invoices/$invoiceId'
     | '/properties/$propertyId'
+    | '/services/$serviceId'
+    | '/technicians/$techId'
     | '/customers/'
     | '/invoices/'
     | '/properties/'
+    | '/technicians/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
     | '/reset-password'
     | '/dashboard'
+    | '/my-day'
     | '/onboarding'
     | '/payments'
     | '/reports'
+    | '/routes'
+    | '/schedule'
     | '/service-history'
     | '/service-plans'
     | '/settings'
     | '/customers/$customerId'
     | '/invoices/$invoiceId'
     | '/properties/$propertyId'
+    | '/services/$serviceId'
+    | '/technicians/$techId'
     | '/customers'
     | '/invoices'
     | '/properties'
+    | '/technicians'
   id:
     | '__root__'
     | '/'
@@ -220,18 +289,24 @@ export interface FileRouteTypes {
     | '/auth'
     | '/reset-password'
     | '/_authenticated/dashboard'
+    | '/_authenticated/my-day'
     | '/_authenticated/onboarding'
     | '/_authenticated/payments'
     | '/_authenticated/reports'
+    | '/_authenticated/routes'
+    | '/_authenticated/schedule'
     | '/_authenticated/service-history'
     | '/_authenticated/service-plans'
     | '/_authenticated/settings'
     | '/_authenticated/customers/$customerId'
     | '/_authenticated/invoices/$invoiceId'
     | '/_authenticated/properties/$propertyId'
+    | '/_authenticated/services/$serviceId'
+    | '/_authenticated/technicians/$techId'
     | '/_authenticated/customers/'
     | '/_authenticated/invoices/'
     | '/_authenticated/properties/'
+    | '/_authenticated/technicians/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -278,6 +353,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/my-day': {
+      id: '/_authenticated/my-day'
+      path: '/my-day'
+      fullPath: '/my-day'
+      preLoaderRoute: typeof AuthenticatedMyDayRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/onboarding': {
       id: '/_authenticated/onboarding'
       path: '/onboarding'
@@ -297,6 +379,20 @@ declare module '@tanstack/react-router' {
       path: '/reports'
       fullPath: '/reports'
       preLoaderRoute: typeof AuthenticatedReportsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/routes': {
+      id: '/_authenticated/routes'
+      path: '/routes'
+      fullPath: '/routes'
+      preLoaderRoute: typeof AuthenticatedRoutesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/schedule': {
+      id: '/_authenticated/schedule'
+      path: '/schedule'
+      fullPath: '/schedule'
+      preLoaderRoute: typeof AuthenticatedScheduleRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/service-history': {
@@ -362,30 +458,60 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPropertiesPropertyIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/services/$serviceId': {
+      id: '/_authenticated/services/$serviceId'
+      path: '/services/$serviceId'
+      fullPath: '/services/$serviceId'
+      preLoaderRoute: typeof AuthenticatedServicesServiceIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/technicians/': {
+      id: '/_authenticated/technicians/'
+      path: '/technicians'
+      fullPath: '/technicians/'
+      preLoaderRoute: typeof AuthenticatedTechniciansIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/technicians/$techId': {
+      id: '/_authenticated/technicians/$techId'
+      path: '/technicians/$techId'
+      fullPath: '/technicians/$techId'
+      preLoaderRoute: typeof AuthenticatedTechniciansTechIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedMyDayRoute: typeof AuthenticatedMyDayRoute
   AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
   AuthenticatedPaymentsRoute: typeof AuthenticatedPaymentsRoute
   AuthenticatedReportsRoute: typeof AuthenticatedReportsRoute
+  AuthenticatedRoutesRoute: typeof AuthenticatedRoutesRoute
+  AuthenticatedScheduleRoute: typeof AuthenticatedScheduleRoute
   AuthenticatedServiceHistoryRoute: typeof AuthenticatedServiceHistoryRoute
   AuthenticatedServicePlansRoute: typeof AuthenticatedServicePlansRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedCustomersCustomerIdRoute: typeof AuthenticatedCustomersCustomerIdRoute
   AuthenticatedInvoicesInvoiceIdRoute: typeof AuthenticatedInvoicesInvoiceIdRoute
   AuthenticatedPropertiesPropertyIdRoute: typeof AuthenticatedPropertiesPropertyIdRoute
+  AuthenticatedServicesServiceIdRoute: typeof AuthenticatedServicesServiceIdRoute
+  AuthenticatedTechniciansTechIdRoute: typeof AuthenticatedTechniciansTechIdRoute
   AuthenticatedCustomersIndexRoute: typeof AuthenticatedCustomersIndexRoute
   AuthenticatedInvoicesIndexRoute: typeof AuthenticatedInvoicesIndexRoute
   AuthenticatedPropertiesIndexRoute: typeof AuthenticatedPropertiesIndexRoute
+  AuthenticatedTechniciansIndexRoute: typeof AuthenticatedTechniciansIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedMyDayRoute: AuthenticatedMyDayRoute,
   AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
   AuthenticatedPaymentsRoute: AuthenticatedPaymentsRoute,
   AuthenticatedReportsRoute: AuthenticatedReportsRoute,
+  AuthenticatedRoutesRoute: AuthenticatedRoutesRoute,
+  AuthenticatedScheduleRoute: AuthenticatedScheduleRoute,
   AuthenticatedServiceHistoryRoute: AuthenticatedServiceHistoryRoute,
   AuthenticatedServicePlansRoute: AuthenticatedServicePlansRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
@@ -393,9 +519,12 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedInvoicesInvoiceIdRoute: AuthenticatedInvoicesInvoiceIdRoute,
   AuthenticatedPropertiesPropertyIdRoute:
     AuthenticatedPropertiesPropertyIdRoute,
+  AuthenticatedServicesServiceIdRoute: AuthenticatedServicesServiceIdRoute,
+  AuthenticatedTechniciansTechIdRoute: AuthenticatedTechniciansTechIdRoute,
   AuthenticatedCustomersIndexRoute: AuthenticatedCustomersIndexRoute,
   AuthenticatedInvoicesIndexRoute: AuthenticatedInvoicesIndexRoute,
   AuthenticatedPropertiesIndexRoute: AuthenticatedPropertiesIndexRoute,
+  AuthenticatedTechniciansIndexRoute: AuthenticatedTechniciansIndexRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =

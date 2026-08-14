@@ -34,12 +34,16 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 import {
   BILLING_LABELS,
+  DAY_LABELS,
   FREQUENCY_LABELS,
   PLAN_STATUS_LABELS,
   customerName,
   friendlyError,
+  timeInputValue,
   today,
 } from "@/lib/format";
+import { useTechnicianOptions } from "@/hooks/useTechnicians";
+import { personName } from "@/lib/format";
 
 export type ServicePlanRow = Database["public"]["Tables"]["service_plans"]["Row"];
 
@@ -67,11 +71,18 @@ export function ServicePlanDialog({
     price: "",
     status: "active",
     next_service_date: today(),
+    technician_id: "",
+    preferred_day: "any",
+    preferred_window_start: "",
+    preferred_window_end: "",
+    estimated_duration_minutes: "45",
+    custom_interval_days: "",
   });
 
   const customers = useCustomerOptions(open);
   const properties = usePropertyOptions(form.customer_id || undefined);
   const pools = usePoolOptions(form.property_id || undefined);
+  const technicians = useTechnicianOptions(open);
 
   useEffect(() => {
     if (!open) return;
@@ -86,6 +97,12 @@ export function ServicePlanDialog({
       price: plan ? String(plan.price) : "",
       status: plan?.status ?? "active",
       next_service_date: plan?.next_service_date ?? today(),
+      technician_id: plan?.technician_id ?? "",
+      preferred_day: plan?.preferred_day === null || plan?.preferred_day === undefined ? "any" : String(plan.preferred_day),
+      preferred_window_start: timeInputValue(plan?.preferred_window_start),
+      preferred_window_end: timeInputValue(plan?.preferred_window_end),
+      estimated_duration_minutes: String(plan?.estimated_duration_minutes ?? 45),
+      custom_interval_days: plan?.custom_interval_days ? String(plan.custom_interval_days) : "",
     });
   }, [open, plan, defaults]);
 
@@ -102,6 +119,15 @@ export function ServicePlanDialog({
         price: Number(form.price || 0),
         status: form.status,
         next_service_date: form.next_service_date || null,
+        technician_id: form.technician_id || null,
+        preferred_day: form.preferred_day === "any" ? null : Number(form.preferred_day),
+        preferred_window_start: form.preferred_window_start || null,
+        preferred_window_end: form.preferred_window_end || null,
+        estimated_duration_minutes: Number(form.estimated_duration_minutes || 45),
+        custom_interval_days:
+          form.frequency === "custom" && form.custom_interval_days
+            ? Number(form.custom_interval_days)
+            : null,
       };
       if (plan?.id) {
         const { error } = await supabase.from("service_plans").update(payload).eq("id", plan.id);
@@ -299,6 +325,104 @@ export function ServicePlanDialog({
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+          </div>
+
+          {form.frequency === "custom" ? (
+            <div className="space-y-1.5">
+              <Label htmlFor="custom_interval_days">Repeat every (days)</Label>
+              <Input
+                id="custom_interval_days"
+                type="number"
+                min={1}
+                value={form.custom_interval_days}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, custom_interval_days: e.target.value }))
+                }
+              />
+            </div>
+          ) : null}
+
+          <div className="rounded-md border border-border p-3">
+            <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              Field assignment
+            </p>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="space-y-1.5">
+                <Label>Assigned technician</Label>
+                <Select
+                  value={form.technician_id || "unassigned"}
+                  onValueChange={(v) =>
+                    setForm((f) => ({ ...f, technician_id: v === "unassigned" ? "" : v }))
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="unassigned">Unassigned</SelectItem>
+                    {(technicians.data ?? []).map((t) => (
+                      <SelectItem key={t.id} value={t.id}>
+                        {personName(t, "Team member")}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1.5">
+                <Label>Preferred day</Label>
+                <Select
+                  value={form.preferred_day}
+                  onValueChange={(v) => setForm((f) => ({ ...f, preferred_day: v }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="any">Any day</SelectItem>
+                    {DAY_LABELS.map((label, i) => (
+                      <SelectItem key={label} value={String(i)}>
+                        {label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="mt-3 grid gap-3 sm:grid-cols-3">
+              <div className="space-y-1.5">
+                <Label htmlFor="window_start">Window start</Label>
+                <Input
+                  id="window_start"
+                  type="time"
+                  value={form.preferred_window_start}
+                  onChange={(e) =>
+                    setForm((f) => ({ ...f, preferred_window_start: e.target.value }))
+                  }
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="window_end">Window end</Label>
+                <Input
+                  id="window_end"
+                  type="time"
+                  value={form.preferred_window_end}
+                  onChange={(e) => setForm((f) => ({ ...f, preferred_window_end: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="duration">Visit length (min)</Label>
+                <Input
+                  id="duration"
+                  type="number"
+                  min={5}
+                  step={5}
+                  value={form.estimated_duration_minutes}
+                  onChange={(e) =>
+                    setForm((f) => ({ ...f, estimated_duration_minutes: e.target.value }))
+                  }
+                />
+              </div>
             </div>
           </div>
 
