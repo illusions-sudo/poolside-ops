@@ -261,7 +261,12 @@ function InvoiceDetail() {
                   toast.error("Quantity must be greater than zero.");
                   return;
                 }
+                if (isPartiallyPaid) {
+                  setAddConfirmOpen(true);
+                  return;
+                }
                 addItem.mutate();
+
               }}
             >
               <div className="space-y-1.5">
