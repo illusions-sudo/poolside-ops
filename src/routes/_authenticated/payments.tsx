@@ -27,7 +27,7 @@ function PaymentsPage() {
       const { data, error } = await supabase
         .from("payments")
         .select(
-          "id, payment_date, amount, payment_method, reference, invoices(invoice_number), customers(first_name, last_name, company_name)",
+          "id, payment_date, amount, payment_method, transaction_reference, invoices(invoice_number), customers(first_name, last_name, company_name)",
         )
         .order("payment_date", { ascending: false })
         .limit(200);
@@ -76,7 +76,7 @@ function PaymentsPage() {
                     </td>
                     <td className="px-4 py-3 text-muted-foreground">
                       {p.payment_method}
-                      {p.reference ? ` · ${p.reference}` : ""}
+                      {p.transaction_reference ? ` · ${p.transaction_reference}` : ""}
                     </td>
                     <td className="num px-4 py-3">{money(p.amount)}</td>
                   </tr>
