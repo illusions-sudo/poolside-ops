@@ -120,7 +120,7 @@ function ServiceDetailPage() {
   });
 
   const s = service.data;
-  const canEdit = !!s && (isAdmin || s.technician_id === user?.id || !s.technician_id);
+  const canEdit = !!s && (isAdmin || s.technician_id === user?.id);
   const closed = s?.status === "completed" || s?.status === "cancelled" || s?.status === "skipped";
 
   const setStatus = useMutation({

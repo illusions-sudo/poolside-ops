@@ -58,6 +58,7 @@ function DashboardPage() {
         monthPayments,
         recentServices,
         todayStops,
+        balances,
       ] = await Promise.all([
           supabase.from("customers").select("id", { count: "exact", head: true }).eq("active", true),
           supabase
@@ -98,6 +99,11 @@ function DashboardPage() {
             .from("service_records")
             .select("id, status, technician_id")
             .eq("service_date", from),
+          // Full receivables total, independent of the capped list shown below.
+          supabase
+            .from("invoices")
+            .select("amount_due")
+            .in("status", ["sent", "partially_paid", "overdue"]),
         ]);
 
       const invoices = openInvoices.data ?? [];
@@ -107,7 +113,7 @@ function DashboardPage() {
         planCount: plans.count ?? 0,
         upcoming: upcoming.data ?? [],
         openInvoices: invoices,
-        outstanding: invoices.reduce((sum, i) => sum + num(i.amount_due), 0),
+        outstanding: (balances.data ?? []).reduce((sum, i) => sum + num(i.amount_due), 0),
         overdue: invoices.filter((i) => i.status === "overdue"),
         collectedThisMonth: (monthPayments.data ?? []).reduce((s, p) => s + num(p.amount), 0),
         recentServices: recentServices.data ?? [],

@@ -1,11 +1,15 @@
 import { useQuery } from "@tanstack/react-query";
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { FileText } from "lucide-react";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { FileText, Plus } from "lucide-react";
+import { useState } from "react";
 
 import { AppShell } from "@/components/shell/app-shell";
 import { EmptyState, ErrorState, LoadingRows } from "@/components/shell/empty-state";
 import { PageHeader } from "@/components/shell/page-header";
 import { StatusBadge } from "@/components/shell/status-badge";
+import { InvoiceDialog } from "@/components/invoices/invoice-dialog";
+import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { customerName, friendlyError, money, shortDate } from "@/lib/format";
 
@@ -22,6 +26,9 @@ export const Route = createFileRoute("/_authenticated/invoices/")({
 });
 
 function InvoicesPage() {
+  const { isAdmin } = useAuth();
+  const navigate = useNavigate();
+  const [createOpen, setCreateOpen] = useState(false);
   const invoices = useQuery({
     queryKey: ["invoices"],
     queryFn: async () => {
@@ -39,7 +46,25 @@ function InvoicesPage() {
 
   return (
     <AppShell>
-      <PageHeader title="Invoices" description="Totals, balances and payment status." />
+      <PageHeader
+        title="Invoices"
+        description="Totals, balances and payment status."
+        actions={
+          isAdmin ? (
+            <Button onClick={() => setCreateOpen(true)}>
+              <Plus className="mr-1.5 size-4" /> New invoice
+            </Button>
+          ) : null
+        }
+      />
+
+      <InvoiceDialog
+        open={createOpen}
+        onOpenChange={setCreateOpen}
+        onCreated={(id) =>
+          void navigate({ to: "/invoices/$invoiceId", params: { invoiceId: id } })
+        }
+      />
 
       <div className="panel overflow-hidden">
         {invoices.isLoading ? (
