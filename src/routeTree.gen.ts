@@ -20,6 +20,7 @@ import { Route as AuthenticatedServicePlansRouteImport } from './routes/_authent
 import { Route as AuthenticatedCustomersIndexRouteImport } from './routes/_authenticated/customers.index'
 import { Route as AuthenticatedCustomersCustomerIdRouteImport } from './routes/_authenticated/customers.$customerId'
 import { Route as AuthenticatedInvoicesIndexRouteImport } from './routes/_authenticated/invoices.index'
+import { Route as AuthenticatedInvoicesInvoiceIdRouteImport } from './routes/_authenticated/invoices.$invoiceId'
 import { Route as AuthenticatedPropertiesIndexRouteImport } from './routes/_authenticated/properties.index'
 import { Route as AuthenticatedPropertiesPropertyIdRouteImport } from './routes/_authenticated/properties.$propertyId'
 
@@ -82,6 +83,12 @@ const AuthenticatedInvoicesIndexRoute =
     path: '/invoices/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedInvoicesInvoiceIdRoute =
+  AuthenticatedInvoicesInvoiceIdRouteImport.update({
+    id: '/invoices/$invoiceId',
+    path: '/invoices/$invoiceId',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedPropertiesIndexRoute =
   AuthenticatedPropertiesIndexRouteImport.update({
     id: '/properties/',
@@ -104,6 +111,7 @@ export interface FileRoutesByFullPath {
   '/service-history': typeof AuthenticatedServiceHistoryRoute
   '/service-plans': typeof AuthenticatedServicePlansRoute
   '/customers/$customerId': typeof AuthenticatedCustomersCustomerIdRoute
+  '/invoices/$invoiceId': typeof AuthenticatedInvoicesInvoiceIdRoute
   '/properties/$propertyId': typeof AuthenticatedPropertiesPropertyIdRoute
   '/customers/': typeof AuthenticatedCustomersIndexRoute
   '/invoices/': typeof AuthenticatedInvoicesIndexRoute
@@ -118,6 +126,7 @@ export interface FileRoutesByTo {
   '/service-history': typeof AuthenticatedServiceHistoryRoute
   '/service-plans': typeof AuthenticatedServicePlansRoute
   '/customers/$customerId': typeof AuthenticatedCustomersCustomerIdRoute
+  '/invoices/$invoiceId': typeof AuthenticatedInvoicesInvoiceIdRoute
   '/properties/$propertyId': typeof AuthenticatedPropertiesPropertyIdRoute
   '/customers': typeof AuthenticatedCustomersIndexRoute
   '/invoices': typeof AuthenticatedInvoicesIndexRoute
@@ -134,6 +143,7 @@ export interface FileRoutesById {
   '/_authenticated/service-history': typeof AuthenticatedServiceHistoryRoute
   '/_authenticated/service-plans': typeof AuthenticatedServicePlansRoute
   '/_authenticated/customers/$customerId': typeof AuthenticatedCustomersCustomerIdRoute
+  '/_authenticated/invoices/$invoiceId': typeof AuthenticatedInvoicesInvoiceIdRoute
   '/_authenticated/properties/$propertyId': typeof AuthenticatedPropertiesPropertyIdRoute
   '/_authenticated/customers/': typeof AuthenticatedCustomersIndexRoute
   '/_authenticated/invoices/': typeof AuthenticatedInvoicesIndexRoute
@@ -150,6 +160,7 @@ export interface FileRouteTypes {
     | '/service-history'
     | '/service-plans'
     | '/customers/$customerId'
+    | '/invoices/$invoiceId'
     | '/properties/$propertyId'
     | '/customers/'
     | '/invoices/'
@@ -164,6 +175,7 @@ export interface FileRouteTypes {
     | '/service-history'
     | '/service-plans'
     | '/customers/$customerId'
+    | '/invoices/$invoiceId'
     | '/properties/$propertyId'
     | '/customers'
     | '/invoices'
@@ -179,6 +191,7 @@ export interface FileRouteTypes {
     | '/_authenticated/service-history'
     | '/_authenticated/service-plans'
     | '/_authenticated/customers/$customerId'
+    | '/_authenticated/invoices/$invoiceId'
     | '/_authenticated/properties/$propertyId'
     | '/_authenticated/customers/'
     | '/_authenticated/invoices/'
@@ -271,6 +284,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedInvoicesIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/invoices/$invoiceId': {
+      id: '/_authenticated/invoices/$invoiceId'
+      path: '/invoices/$invoiceId'
+      fullPath: '/invoices/$invoiceId'
+      preLoaderRoute: typeof AuthenticatedInvoicesInvoiceIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/properties/': {
       id: '/_authenticated/properties/'
       path: '/properties'
@@ -294,6 +314,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedServiceHistoryRoute: typeof AuthenticatedServiceHistoryRoute
   AuthenticatedServicePlansRoute: typeof AuthenticatedServicePlansRoute
   AuthenticatedCustomersCustomerIdRoute: typeof AuthenticatedCustomersCustomerIdRoute
+  AuthenticatedInvoicesInvoiceIdRoute: typeof AuthenticatedInvoicesInvoiceIdRoute
   AuthenticatedPropertiesPropertyIdRoute: typeof AuthenticatedPropertiesPropertyIdRoute
   AuthenticatedCustomersIndexRoute: typeof AuthenticatedCustomersIndexRoute
   AuthenticatedInvoicesIndexRoute: typeof AuthenticatedInvoicesIndexRoute
@@ -306,6 +327,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedServiceHistoryRoute: AuthenticatedServiceHistoryRoute,
   AuthenticatedServicePlansRoute: AuthenticatedServicePlansRoute,
   AuthenticatedCustomersCustomerIdRoute: AuthenticatedCustomersCustomerIdRoute,
+  AuthenticatedInvoicesInvoiceIdRoute: AuthenticatedInvoicesInvoiceIdRoute,
   AuthenticatedPropertiesPropertyIdRoute:
     AuthenticatedPropertiesPropertyIdRoute,
   AuthenticatedCustomersIndexRoute: AuthenticatedCustomersIndexRoute,

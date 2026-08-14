@@ -88,7 +88,7 @@ function InvoiceDetail() {
                   <td className="px-4 py-3">{item.description}</td>
                   <td className="num px-4 py-3">{item.quantity}</td>
                   <td className="num px-4 py-3">{money(item.unit_price)}</td>
-                  <td className="num px-4 py-3">{money(item.amount)}</td>
+                  <td className="num px-4 py-3">{money(item.total)}</td>
                 </tr>
               ))}
             </tbody>
@@ -98,7 +98,7 @@ function InvoiceDetail() {
         <div className="space-y-4">
           <div className="panel space-y-2 p-4 text-sm">
             <Row label="Subtotal" value={money(inv.subtotal)} />
-            <Row label="Tax" value={money(inv.tax_amount)} />
+            <Row label="Tax" value={money(inv.tax)} />
             <Row label="Total" value={money(inv.total)} bold />
             <Row label="Paid" value={money(inv.amount_paid)} />
             <Row label="Balance due" value={money(inv.amount_due)} bold />
