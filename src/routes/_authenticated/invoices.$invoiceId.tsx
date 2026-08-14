@@ -383,15 +383,30 @@ function InvoiceDetail() {
         onConfirm={() => setStatus.mutate("void")}
       />
       <ConfirmDialog
+        open={addConfirmOpen}
+        onOpenChange={setAddConfirmOpen}
+        title="This invoice has already received a payment"
+        description="Adding a line item will increase the total and the balance still owed. The change is recorded in the financial audit log."
+        confirmLabel="Add anyway"
+        destructive
+        pending={addItem.isPending}
+        onConfirm={() => addItem.mutate()}
+      />
+      <ConfirmDialog
         open={!!deleteItemId}
         onOpenChange={(o) => !o && setDeleteItemId(null)}
-        title="Remove this line item?"
-        description="The invoice total will be recalculated."
+        title={isPartiallyPaid ? "This invoice has already received a payment" : "Remove this line item?"}
+        description={
+          isPartiallyPaid
+            ? "Removing a line item will lower the total and change the balance still owed. The change is recorded in the financial audit log."
+            : "The invoice total will be recalculated."
+        }
         confirmLabel="Remove"
         destructive
         pending={removeItem.isPending}
         onConfirm={() => deleteItemId && removeItem.mutate(deleteItemId)}
       />
+
       <ConfirmDialog
         open={!!deletePaymentId}
         onOpenChange={(o) => !o && setDeletePaymentId(null)}
