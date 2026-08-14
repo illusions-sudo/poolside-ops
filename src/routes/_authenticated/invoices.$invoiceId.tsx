@@ -48,6 +48,8 @@ function InvoiceDetail() {
   const [deleteItemId, setDeleteItemId] = useState<string | null>(null);
   const [deletePaymentId, setDeletePaymentId] = useState<string | null>(null);
   const [item, setItem] = useState({ description: "", quantity: "1", unit_price: "" });
+  const [addConfirmOpen, setAddConfirmOpen] = useState(false);
+
 
   const invoice = useQuery({
     queryKey: ["invoice", invoiceId],
