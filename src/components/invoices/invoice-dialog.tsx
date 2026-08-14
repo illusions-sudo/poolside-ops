@@ -106,7 +106,8 @@ export function InvoiceDialog({
       if (!organization?.id) throw new Error("Your company workspace is still loading.");
       const { data, error } = await supabase
         .from("invoices")
-        .insert({ ...payload, organization_id: organization.id, status: "draft" })
+        // invoice_number is assigned by the database when left blank.
+        .insert({ ...payload, organization_id: organization.id, status: "draft", invoice_number: "" })
         .select("id")
         .single();
       if (error) throw error;
