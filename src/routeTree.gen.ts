@@ -16,6 +16,7 @@ import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
 import { Route as AuthenticatedPaymentsRouteImport } from './routes/_authenticated/payments'
+import { Route as AuthenticatedReportsRouteImport } from './routes/_authenticated/reports'
 import { Route as AuthenticatedServiceHistoryRouteImport } from './routes/_authenticated/service-history'
 import { Route as AuthenticatedServicePlansRouteImport } from './routes/_authenticated/service-plans'
 import { Route as AuthenticatedCustomersIndexRouteImport } from './routes/_authenticated/customers.index'
@@ -57,6 +58,11 @@ const AuthenticatedOnboardingRoute = AuthenticatedOnboardingRouteImport.update({
 const AuthenticatedPaymentsRoute = AuthenticatedPaymentsRouteImport.update({
   id: '/payments',
   path: '/payments',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedReportsRoute = AuthenticatedReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedServiceHistoryRoute =
@@ -115,6 +121,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/payments': typeof AuthenticatedPaymentsRoute
+  '/reports': typeof AuthenticatedReportsRoute
   '/service-history': typeof AuthenticatedServiceHistoryRoute
   '/service-plans': typeof AuthenticatedServicePlansRoute
   '/customers/$customerId': typeof AuthenticatedCustomersCustomerIdRoute
@@ -131,6 +138,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/payments': typeof AuthenticatedPaymentsRoute
+  '/reports': typeof AuthenticatedReportsRoute
   '/service-history': typeof AuthenticatedServiceHistoryRoute
   '/service-plans': typeof AuthenticatedServicePlansRoute
   '/customers/$customerId': typeof AuthenticatedCustomersCustomerIdRoute
@@ -149,6 +157,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
   '/_authenticated/payments': typeof AuthenticatedPaymentsRoute
+  '/_authenticated/reports': typeof AuthenticatedReportsRoute
   '/_authenticated/service-history': typeof AuthenticatedServiceHistoryRoute
   '/_authenticated/service-plans': typeof AuthenticatedServicePlansRoute
   '/_authenticated/customers/$customerId': typeof AuthenticatedCustomersCustomerIdRoute
@@ -167,6 +176,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/onboarding'
     | '/payments'
+    | '/reports'
     | '/service-history'
     | '/service-plans'
     | '/customers/$customerId'
@@ -183,6 +193,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/onboarding'
     | '/payments'
+    | '/reports'
     | '/service-history'
     | '/service-plans'
     | '/customers/$customerId'
@@ -200,6 +211,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/_authenticated/onboarding'
     | '/_authenticated/payments'
+    | '/_authenticated/reports'
     | '/_authenticated/service-history'
     | '/_authenticated/service-plans'
     | '/_authenticated/customers/$customerId'
@@ -268,6 +280,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPaymentsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/reports': {
+      id: '/_authenticated/reports'
+      path: '/reports'
+      fullPath: '/reports'
+      preLoaderRoute: typeof AuthenticatedReportsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/service-history': {
       id: '/_authenticated/service-history'
       path: '/service-history'
@@ -331,6 +350,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
   AuthenticatedPaymentsRoute: typeof AuthenticatedPaymentsRoute
+  AuthenticatedReportsRoute: typeof AuthenticatedReportsRoute
   AuthenticatedServiceHistoryRoute: typeof AuthenticatedServiceHistoryRoute
   AuthenticatedServicePlansRoute: typeof AuthenticatedServicePlansRoute
   AuthenticatedCustomersCustomerIdRoute: typeof AuthenticatedCustomersCustomerIdRoute
@@ -345,6 +365,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
   AuthenticatedPaymentsRoute: AuthenticatedPaymentsRoute,
+  AuthenticatedReportsRoute: AuthenticatedReportsRoute,
   AuthenticatedServiceHistoryRoute: AuthenticatedServiceHistoryRoute,
   AuthenticatedServicePlansRoute: AuthenticatedServicePlansRoute,
   AuthenticatedCustomersCustomerIdRoute: AuthenticatedCustomersCustomerIdRoute,
