@@ -10,7 +10,7 @@ import { ROLE_LABELS } from "@/lib/format";
 
 export const Route = createFileRoute("/_authenticated/settings")({
   validateSearch: (search: Record<string, unknown>) => ({
-    tab: typeof search.tab === "string" ? search.tab : "company",
+    tab: typeof search['tab'] === "string" ? (search['tab'] as string) : "company",
   }),
   head: () => ({
     meta: [
@@ -32,10 +32,24 @@ function SettingsPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("profiles")
-        .select("id, first_name, last_name, email, user_roles(role)")
+        .select("id, first_name, last_name, email")
         .order("created_at");
       if (error) throw error;
       return data;
+    },
+  });
+
+  const roles = useQuery({
+    queryKey: ["team-roles"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("user_roles").select("user_id, role");
+      if (error) throw error;
+      const map: Record<string, string> = {};
+      for (const r of data ?? []) {
+        const label = ROLE_LABELS[r.role] ?? r.role;
+        map[r.user_id] = map[r.user_id] ? `${map[r.user_id]}, ${label}` : label;
+      }
+      return map;
     },
   });
 
@@ -81,7 +95,7 @@ function SettingsPage() {
                   </td>
                   <td className="px-4 py-3 text-muted-foreground">{m.email}</td>
                   <td className="px-4 py-3 text-muted-foreground">
-                    {m.user_roles?.map((r) => ROLE_LABELS[r.role] ?? r.role).join(", ") || "—"}
+                    {roles.data?.[m.id] ?? "—"}
                   </td>
                 </tr>
               ))}
