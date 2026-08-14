@@ -154,8 +154,12 @@ function InvoiceDetail() {
   const inv = invoice.data;
   const isDraft = inv.status === "draft";
   const isVoid = inv.status === "void";
-  const canEditItems = isAdmin && !isVoid;
+  // A fully paid invoice is locked; a partially paid one asks for confirmation.
+  const isPaid = inv.status === "paid";
+  const isPartiallyPaid = inv.status === "partially_paid";
+  const canEditItems = isAdmin && !isVoid && !isPaid;
   const canPay = isAdmin && !isDraft && !isVoid && num(inv.amount_due) > 0;
+
 
   return (
     <AppShell>
