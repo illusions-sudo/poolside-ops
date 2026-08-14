@@ -110,19 +110,19 @@ export function InvoiceDialog({
     mutationFn: async () => {
       // Only the invoice "header" is editable here. Subtotal, tax, total, amount
       // paid, amount due and status are always recalculated by the database.
-      const payload = financialsLocked
-        ? { notes: form.notes.trim() || null }
-        : {
-            customer_id: form.customer_id,
-            property_id: form.property_id || null,
-            invoice_date: form.invoice_date,
-            due_date: form.due_date,
-            tax_rate: Number(form.tax_rate) || 0,
-            discount: Number(form.discount) || 0,
-            notes: form.notes.trim() || null,
-          };
+      const payload = {
+        customer_id: form.customer_id,
+        property_id: form.property_id || null,
+        invoice_date: form.invoice_date,
+        due_date: form.due_date,
+        tax_rate: Number(form.tax_rate) || 0,
+        discount: Number(form.discount) || 0,
+        notes: form.notes.trim() || null,
+      };
       if (invoice?.id) {
-        const { error } = await supabase.from("invoices").update(payload).eq("id", invoice.id);
+        // A paid invoice keeps every financial field frozen; only notes change.
+        const update = financialsLocked ? { notes: payload.notes } : payload;
+        const { error } = await supabase.from("invoices").update(update).eq("id", invoice.id);
         if (error) throw error;
         return invoice.id;
       }
@@ -136,6 +136,7 @@ export function InvoiceDialog({
           status: "draft",
           invoice_number: "",
         })
+
         .select("id")
         .single();
       if (error) throw error;
