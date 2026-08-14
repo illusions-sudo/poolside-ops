@@ -118,7 +118,10 @@ export function ServicePhotos({ service, canEdit }: { service: ServiceRef; canEd
       {photos.data?.length ? (
         <div className="grid grid-cols-2 gap-3 p-4 sm:grid-cols-3 lg:grid-cols-4">
           {photos.data.map((p) => (
-            <figure key={p.id} className="group relative overflow-hidden rounded-md border border-border">
+            <figure
+              key={p.id}
+              className="group relative overflow-hidden rounded-md border border-border"
+            >
               {p.url ? (
                 <img
                   src={p.url}

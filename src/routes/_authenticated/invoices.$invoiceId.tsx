@@ -50,7 +50,6 @@ function InvoiceDetail() {
   const [item, setItem] = useState({ description: "", quantity: "1", unit_price: "" });
   const [addConfirmOpen, setAddConfirmOpen] = useState(false);
 
-
   const invoice = useQuery({
     queryKey: ["invoice", invoiceId],
     queryFn: async () => {
@@ -162,7 +161,6 @@ function InvoiceDetail() {
   const canEditItems = isAdmin && !isVoid && !isPaid;
   const canPay = isAdmin && !isDraft && !isVoid && num(inv.amount_due) > 0;
 
-
   return (
     <AppShell>
       <PageHeader
@@ -180,7 +178,11 @@ function InvoiceDetail() {
               </Button>
             ) : null}
             {isAdmin && isDraft ? (
-              <Button size="sm" onClick={() => setStatus.mutate("sent")} disabled={setStatus.isPending}>
+              <Button
+                size="sm"
+                onClick={() => setStatus.mutate("sent")}
+                disabled={setStatus.isPending}
+              >
                 {setStatus.isPending ? (
                   <Loader2 className="mr-1.5 size-4 animate-spin" />
                 ) : (
@@ -189,7 +191,11 @@ function InvoiceDetail() {
                 Mark as sent
               </Button>
             ) : null}
-            {canPay ? <Button size="sm" onClick={() => setPayOpen(true)}>Record payment</Button> : null}
+            {canPay ? (
+              <Button size="sm" onClick={() => setPayOpen(true)}>
+                Record payment
+              </Button>
+            ) : null}
             {isAdmin && !isVoid ? (
               <Button variant="outline" size="sm" onClick={() => setVoidOpen(true)}>
                 <Ban className="mr-1.5 size-4" /> Void
@@ -268,7 +274,6 @@ function InvoiceDetail() {
                   return;
                 }
                 addItem.mutate();
-
               }}
             >
               <div className="space-y-1.5">
@@ -317,7 +322,9 @@ function InvoiceDetail() {
         <div className="space-y-4">
           <div className="panel space-y-2 p-4 text-sm">
             <Row label="Subtotal" value={money(inv.subtotal)} />
-            {num(inv.discount) > 0 ? <Row label="Discount" value={`−${money(inv.discount)}`} /> : null}
+            {num(inv.discount) > 0 ? (
+              <Row label="Discount" value={`−${money(inv.discount)}`} />
+            ) : null}
             <Row label={`Tax (${num(inv.tax_rate)}%)`} value={money(inv.tax)} />
             <Row label="Total" value={money(inv.total)} bold />
             <Row label="Paid" value={money(inv.amount_paid)} />
@@ -395,7 +402,9 @@ function InvoiceDetail() {
       <ConfirmDialog
         open={!!deleteItemId}
         onOpenChange={(o) => !o && setDeleteItemId(null)}
-        title={isPartiallyPaid ? "This invoice has already received a payment" : "Remove this line item?"}
+        title={
+          isPartiallyPaid ? "This invoice has already received a payment" : "Remove this line item?"
+        }
         description={
           isPartiallyPaid
             ? "Removing a line item will lower the total and change the balance still owed. The change is recorded in the financial audit log."

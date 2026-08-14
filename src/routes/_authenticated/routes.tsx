@@ -64,7 +64,11 @@ type Stop = {
   status: string;
   scheduled_time: string | null;
   technician_id: string | null;
-  customers: { first_name: string | null; last_name: string | null; company_name: string | null } | null;
+  customers: {
+    first_name: string | null;
+    last_name: string | null;
+    company_name: string | null;
+  } | null;
   properties: {
     property_name: string | null;
     address: string | null;

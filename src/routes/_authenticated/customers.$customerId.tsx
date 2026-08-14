@@ -13,14 +13,7 @@ import { StatusBadge } from "@/components/shell/status-badge";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import {
-  FREQUENCY_LABELS,
-  customerName,
-  friendlyError,
-  money,
-  num,
-  shortDate,
-} from "@/lib/format";
+import { FREQUENCY_LABELS, customerName, friendlyError, money, num, shortDate } from "@/lib/format";
 
 export const Route = createFileRoute("/_authenticated/customers/$customerId")({
   head: () => ({
@@ -139,7 +132,9 @@ function CustomerDetail() {
                 <Row label="Address" value={c.billing_address} />
                 <Row
                   label="City / State"
-                  value={[c.billing_city, c.billing_state, c.billing_zip].filter(Boolean).join(", ")}
+                  value={[c.billing_city, c.billing_state, c.billing_zip]
+                    .filter(Boolean)
+                    .join(", ")}
                 />
                 <Row label="Email" value={c.email} />
                 <Row label="Phone" value={c.phone} />
@@ -303,11 +298,7 @@ function CustomerDetail() {
             onOpenChange={setPropertyOpen}
             customerId={customerId}
           />
-          <ServicePlanDialog
-            open={planOpen}
-            onOpenChange={setPlanOpen}
-            defaults={{ customerId }}
-          />
+          <ServicePlanDialog open={planOpen} onOpenChange={setPlanOpen} defaults={{ customerId }} />
         </>
       )}
     </AppShell>

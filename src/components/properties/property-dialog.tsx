@@ -122,8 +122,7 @@ export function PropertyDialog({
   });
 
   const set =
-    (key: keyof typeof EMPTY) =>
-    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+    (key: keyof typeof EMPTY) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
       setForm((f) => ({ ...f, [key]: e.target.value }));
 
   function onSubmit(e: React.FormEvent) {

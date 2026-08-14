@@ -61,7 +61,11 @@ type Visit = {
   scheduled_time: string | null;
   status: string;
   technician_id: string | null;
-  customers: { first_name: string | null; last_name: string | null; company_name: string | null } | null;
+  customers: {
+    first_name: string | null;
+    last_name: string | null;
+    company_name: string | null;
+  } | null;
   properties: { address: string | null; city: string | null } | null;
   profiles: { first_name: string | null; last_name: string | null; email: string | null } | null;
 };

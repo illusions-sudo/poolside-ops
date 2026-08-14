@@ -59,11 +59,16 @@ export function daysOverdue(dueDate: string | null | undefined): number {
   return Math.max(0, Math.round((start - due) / 86_400_000));
 }
 
-export function customerName(c: {
-  first_name?: string | null;
-  last_name?: string | null;
-  company_name?: string | null;
-} | null | undefined): string {
+export function customerName(
+  c:
+    | {
+        first_name?: string | null;
+        last_name?: string | null;
+        company_name?: string | null;
+      }
+    | null
+    | undefined,
+): string {
   if (!c) return "—";
   const person = [c.first_name, c.last_name].filter(Boolean).join(" ").trim();
   if (person && c.company_name) return `${person} (${c.company_name})`;
@@ -101,7 +106,6 @@ export const SERVICE_STATUS_LABELS: Record<string, string> = {
   cancelled: "Cancelled",
   skipped: "Skipped",
 };
-
 
 export const INVOICE_STATUS_LABELS: Record<string, string> = {
   draft: "Draft",
@@ -155,7 +159,10 @@ export function downloadCsv(filename: string, rows: (string | number | null | un
 }
 
 /** Turns a database/PostgREST error into something safe to show a user. */
-export function friendlyError(error: unknown, fallback = "Something went wrong. Please try again."): string {
+export function friendlyError(
+  error: unknown,
+  fallback = "Something went wrong. Please try again.",
+): string {
   const raw =
     typeof error === "string"
       ? error
@@ -169,8 +176,10 @@ export function friendlyError(error: unknown, fallback = "Something went wrong. 
   if (/row-level security|permission denied|not authorized/i.test(raw))
     return "You don't have permission to do that.";
   if (/violates not-null/i.test(raw)) return "Please fill in all required fields.";
-  if (/check constraint|check_violation/i.test(raw)) return "Some values are not valid. Please review the form.";
-  if (/failed to fetch|network/i.test(raw)) return "Network problem — please check your connection and retry.";
+  if (/check constraint|check_violation/i.test(raw))
+    return "Some values are not valid. Please review the form.";
+  if (/failed to fetch|network/i.test(raw))
+    return "Network problem — please check your connection and retry.";
   return fallback;
 }
 
@@ -267,7 +276,15 @@ export const CHEMISTRY_FIELDS = [
   { key: "water_temperature", label: "Water Temperature", unit: "°F", ideal: "" },
 ] as const;
 
-export const DAY_LABELS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+export const DAY_LABELS = [
+  "Sunday",
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+];
 export const DAY_SHORT = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 /** Formats a Postgres time value (HH:MM:SS) for display. */
@@ -319,7 +336,10 @@ export function weekdayDate(iso: string): string {
 }
 
 export function personName(
-  p: { first_name?: string | null; last_name?: string | null; email?: string | null } | null | undefined,
+  p:
+    | { first_name?: string | null; last_name?: string | null; email?: string | null }
+    | null
+    | undefined,
   fallback = "Unassigned",
 ): string {
   if (!p) return fallback;
@@ -328,14 +348,20 @@ export function personName(
 }
 
 export function fullAddress(
-  p: { address?: string | null; city?: string | null; state?: string | null; zip?: string | null } | null | undefined,
+  p:
+    | { address?: string | null; city?: string | null; state?: string | null; zip?: string | null }
+    | null
+    | undefined,
 ): string {
   if (!p) return "";
   return [p.address, p.city, p.state, p.zip].filter(Boolean).join(", ");
 }
 
 export function mapsHref(
-  p: { address?: string | null; city?: string | null; state?: string | null; zip?: string | null } | null | undefined,
+  p:
+    | { address?: string | null; city?: string | null; state?: string | null; zip?: string | null }
+    | null
+    | undefined,
 ): string {
   return `https://maps.google.com/?q=${encodeURIComponent(fullAddress(p))}`;
 }

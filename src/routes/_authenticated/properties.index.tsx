@@ -134,9 +134,7 @@ function PropertiesPage() {
                         {p.city ? `, ${p.city}` : ""} {p.state ?? ""} {p.zip ?? ""}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-muted-foreground">
-                      {customerName(p.customers)}
-                    </td>
+                    <td className="px-4 py-3 text-muted-foreground">{customerName(p.customers)}</td>
                     <td className="num px-4 py-3 text-muted-foreground">{p.gate_code || "—"}</td>
                     <td className="num px-4 py-3 text-muted-foreground">
                       {p.pools?.[0]?.count ?? 0}

@@ -120,9 +120,7 @@ function ServicePlansPage() {
                       <span className="block text-xs">{p.properties?.address}</span>
                     </td>
                     <td className="px-4 py-3 text-muted-foreground">
-                      <span className="block">
-                        {FREQUENCY_LABELS[p.frequency] ?? p.frequency}
-                      </span>
+                      <span className="block">{FREQUENCY_LABELS[p.frequency] ?? p.frequency}</span>
                       <span className="block text-xs">
                         Billed {BILLING_LABELS[p.billing_frequency] ?? p.billing_frequency} · next{" "}
                         {shortDate(p.next_service_date)}

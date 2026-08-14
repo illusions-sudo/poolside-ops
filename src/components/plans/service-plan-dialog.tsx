@@ -98,7 +98,10 @@ export function ServicePlanDialog({
       status: plan?.status ?? "active",
       next_service_date: plan?.next_service_date ?? today(),
       technician_id: plan?.technician_id ?? "",
-      preferred_day: plan?.preferred_day === null || plan?.preferred_day === undefined ? "any" : String(plan.preferred_day),
+      preferred_day:
+        plan?.preferred_day === null || plan?.preferred_day === undefined
+          ? "any"
+          : String(plan.preferred_day),
       preferred_window_start: timeInputValue(plan?.preferred_window_start),
       preferred_window_end: timeInputValue(plan?.preferred_window_end),
       estimated_duration_minutes: String(plan?.estimated_duration_minutes ?? 45),
@@ -336,9 +339,7 @@ export function ServicePlanDialog({
                 type="number"
                 min={1}
                 value={form.custom_interval_days}
-                onChange={(e) =>
-                  setForm((f) => ({ ...f, custom_interval_days: e.target.value }))
-                }
+                onChange={(e) => setForm((f) => ({ ...f, custom_interval_days: e.target.value }))}
               />
             </div>
           ) : null}
