@@ -58,6 +58,7 @@ function DashboardPage() {
         monthPayments,
         recentServices,
         todayStops,
+        balances,
       ] = await Promise.all([
           supabase.from("customers").select("id", { count: "exact", head: true }).eq("active", true),
           supabase
