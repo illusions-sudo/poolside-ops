@@ -24,8 +24,12 @@ function ReportsPage() {
     queryKey: ["reports-summary"],
     queryFn: async () => {
       const [invoices, payments, records] = await Promise.all([
-        supabase.from("invoices").select("total, amount_due, status"),
-        supabase.from("payments").select("amount, payment_date"),
+        // Draft and voided invoices are never counted as revenue or as owed money.
+        supabase
+          .from("invoices")
+          .select("total, amount_due, status")
+          .not("status", "in", "(draft,void)"),
+        supabase.from("payments").select("amount, payment_date").eq("status", "completed"),
         supabase.from("service_records").select("id, status"),
       ]);
       if (invoices.error) throw invoices.error;
