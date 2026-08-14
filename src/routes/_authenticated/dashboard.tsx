@@ -99,6 +99,11 @@ function DashboardPage() {
             .from("service_records")
             .select("id, status, technician_id")
             .eq("service_date", from),
+          // Full receivables total, independent of the capped list shown below.
+          supabase
+            .from("invoices")
+            .select("amount_due")
+            .in("status", ["sent", "partially_paid", "overdue"]),
         ]);
 
       const invoices = openInvoices.data ?? [];
