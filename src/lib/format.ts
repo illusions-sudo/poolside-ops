@@ -373,7 +373,27 @@ export function mapsHref(
     | null
     | undefined,
 ): string {
-  return `https://maps.google.com/?q=${encodeURIComponent(fullAddress(p))}`;
+  // Apple Maps: on iPhone this hands off to the Maps app with driving directions.
+  return `https://maps.apple.com/?daddr=${encodeURIComponent(fullAddress(p))}&dirflg=d`;
+}
+
+export function openMapsDirections(
+  p:
+    | { address?: string | null; city?: string | null; state?: string | null; zip?: string | null }
+    | null
+    | undefined,
+): void {
+  const dest = fullAddress(p);
+  if (!dest) return;
+  const href = `https://maps.apple.com/?daddr=${encodeURIComponent(dest)}&dirflg=d`;
+  const isIos =
+    typeof navigator !== "undefined" && /iPad|iPhone|iPod/.test(navigator.userAgent);
+  if (isIos) {
+    // Same-window navigation so the home-screen app can hand off to Apple Maps.
+    window.location.href = href;
+  } else {
+    window.open(href, "_blank", "noopener,noreferrer");
+  }
 }
 
 export function telHref(phone: string | null | undefined): string {

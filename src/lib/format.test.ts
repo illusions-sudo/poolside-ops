@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { addMonths } from "./format";
+import { addMonths, mapsHref } from "./format";
 
 describe("addMonths (invoice due date)", () => {
   it("adds one month to the invoice date", () => {
@@ -19,5 +19,24 @@ describe("addMonths (invoice due date)", () => {
 
   it("rolls across year boundaries", () => {
     expect(addMonths("2026-12-15", 1)).toBe("2027-01-15");
+  });
+});
+
+describe("mapsHref (Apple Maps directions)", () => {
+  it("builds an Apple Maps driving-directions link from the property address", () => {
+    const href = mapsHref({
+      address: "123 Main St",
+      city: "Manchester",
+      state: "VT",
+      zip: "05255",
+    });
+    expect(href).toBe(
+      "https://maps.apple.com/?daddr=123%20Main%20St%2C%20Manchester%2C%20VT%2C%2005255&dirflg=d",
+    );
+  });
+
+  it("omits missing address parts", () => {
+    const href = mapsHref({ address: "123 Main St", city: null, state: "VT", zip: null });
+    expect(href).toBe("https://maps.apple.com/?daddr=123%20Main%20St%2C%20VT&dirflg=d");
   });
 });

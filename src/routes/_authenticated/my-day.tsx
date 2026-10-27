@@ -30,6 +30,7 @@ import {
   friendlyError,
   fullAddress,
   mapsHref,
+  openMapsDirections,
   telHref,
   today,
   weekdayDate,
@@ -217,7 +218,10 @@ function MyDayPage() {
                     className="flex-1 sm:flex-none"
                     variant="outline"
                     disabled={setStatus.isPending}
-                    onClick={() => setStatus.mutate({ id: s.id, status: "en_route" })}
+                    onClick={() => {
+                      setStatus.mutate({ id: s.id, status: "en_route" });
+                      openMapsDirections(s.properties);
+                    }}
                   >
                     <Navigation className="mr-1.5 size-4" /> On my way
                   </Button>
