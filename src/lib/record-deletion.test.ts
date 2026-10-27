@@ -1,9 +1,9 @@
 import { createClient } from "@supabase/supabase-js";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
-const session = JSON.parse(process.env.LOVABLE_BROWSER_SUPABASE_SESSION_JSON ?? "{}");
-const url = process.env.VITE_SUPABASE_URL;
-const key = process.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+const session = JSON.parse(process.env["LOVABLE_BROWSER_SUPABASE_SESSION_JSON"] ?? "{}");
+const url = process.env["VITE_SUPABASE_URL"];
+const key = process.env["VITE_SUPABASE_PUBLISHABLE_KEY"];
 const configured = Boolean(url && key && session.access_token);
 
 describe.skipIf(!configured)("Inactive-only deletion (live authenticated database)", () => {
