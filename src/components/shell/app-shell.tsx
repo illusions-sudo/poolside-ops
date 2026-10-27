@@ -22,6 +22,7 @@ import {
 import { useState, type ReactNode } from "react";
 
 import { GlobalSearch } from "@/components/shell/global-search";
+import { OfflineSync } from "@/components/shell/offline-sync";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -186,6 +187,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           </div>
         </header>
 
+        <OfflineSync />
         <main className="mx-auto w-full max-w-[1400px] px-4 py-6 pb-24 sm:px-6 lg:py-8 lg:pb-8">
           {children}
         </main>
