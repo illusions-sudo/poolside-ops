@@ -52,3 +52,25 @@ export function ServiceTypePicker({
     </div>
   );
 }
+
+/** Small "Pool" / "Spa" tag for plan lists; renders nothing when unset. */
+export function ServiceTypeBadge({
+  value,
+  className,
+}: {
+  value: string | null | undefined;
+  className?: string;
+}) {
+  const label = value ? SERVICE_TYPE_LABELS[value] ?? null : null;
+  if (!label) return null;
+  return (
+    <span
+      className={cn(
+        "inline-flex items-center whitespace-nowrap rounded-full border border-border bg-secondary px-2 py-0.5 text-xs font-medium text-secondary-foreground",
+        className,
+      )}
+    >
+      {label}
+    </span>
+  );
+}

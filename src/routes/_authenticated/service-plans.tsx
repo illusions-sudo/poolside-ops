@@ -7,6 +7,7 @@ import { AppShell } from "@/components/shell/app-shell";
 import { EmptyState, ErrorState, LoadingRows } from "@/components/shell/empty-state";
 import { PageHeader } from "@/components/shell/page-header";
 import { ServicePlanDialog, type ServicePlanRow } from "@/components/plans/service-plan-dialog";
+import { ServiceTypeBadge } from "@/components/plans/service-type-picker";
 import { StatusBadge } from "@/components/shell/status-badge";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
@@ -114,7 +115,12 @@ function ServicePlansPage() {
               <tbody className="divide-y divide-border">
                 {plans.data.map((p) => (
                   <tr key={p.id} className="hover:bg-accent/25">
-                    <td className="px-4 py-3 font-medium">{p.service_name}</td>
+                    <td className="px-4 py-3 font-medium">
+                      <span className="flex items-center gap-2">
+                        {p.service_name}
+                        <ServiceTypeBadge value={p.service_type} />
+                      </span>
+                    </td>
                     <td className="px-4 py-3 text-muted-foreground">
                       <span className="block">{customerName(p.customers)}</span>
                       <span className="block text-xs">{p.properties?.address}</span>
