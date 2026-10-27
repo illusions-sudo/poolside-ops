@@ -6,6 +6,7 @@ import { useState } from "react";
 import { AppShell } from "@/components/shell/app-shell";
 import { EmptyState, ErrorState, LoadingRows } from "@/components/shell/empty-state";
 import { PageHeader } from "@/components/shell/page-header";
+import { RecordLifecycleActions } from "@/components/shell/record-lifecycle-actions";
 import { PoolDialog } from "@/components/pools/pool-dialog";
 import { PropertyDialog } from "@/components/properties/property-dialog";
 import { StatusBadge } from "@/components/shell/status-badge";
@@ -21,6 +22,8 @@ export const Route = createFileRoute("/_authenticated/properties/$propertyId")({
       { name: "description", content: "Pools, access notes, service plans and visit history." },
       { property: "og:title", content: "Property details — AquaLedger" },
       { property: "og:description", content: "Pool and service details for this address." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: PropertyDetail,
@@ -28,6 +31,7 @@ export const Route = createFileRoute("/_authenticated/properties/$propertyId")({
 
 function PropertyDetail() {
   const { propertyId } = Route.useParams();
+  const navigate = Route.useNavigate();
   const { isAdmin } = useAuth();
   const [editOpen, setEditOpen] = useState(false);
   const [poolOpen, setPoolOpen] = useState(false);
@@ -92,6 +96,8 @@ function PropertyDetail() {
             actions={
               isAdmin ? (
                 <>
+                  <RecordLifecycleActions kind="property" id={p.id} active={p.active} name={p.property_name || p.address}
+                    onDeleted={() => void navigate({ to: "/properties" })} />
                   <Button variant="outline" onClick={() => setEditOpen(true)}>
                     <Pencil className="mr-2 size-4" /> Edit
                   </Button>
@@ -104,6 +110,7 @@ function PropertyDetail() {
           />
 
           <div className="grid gap-6 lg:grid-cols-3">
+            {!p.active ? <p className="text-sm text-muted-foreground lg:col-span-3">Inactive property</p> : null}
             <section className="panel p-4">
               <h2 className="font-display text-sm font-semibold">Details</h2>
               <dl className="mt-3 space-y-2 text-sm">

@@ -19,3 +19,5 @@
 > Query data is persisted to localStorage via PersistQueryClientProvider in `__root.tsx`.
 > Photo uploads still require a connection.
 <!-- LOVABLE:END:AGENTS -->
+
+Customer/property permanent deletion uses guarded database RPCs and DELETE triggers, with shared lifecycle controls; invoice-linked records remain inactive to prevent cascading loss of financial history.
