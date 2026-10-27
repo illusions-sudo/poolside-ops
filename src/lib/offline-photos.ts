@@ -64,9 +64,11 @@ function notify() {
   listeners.forEach((l) => l());
 }
 
-export function subscribePhotoQueue(fn: () => void) {
+export function subscribePhotoQueue(fn: () => void): () => void {
   listeners.add(fn);
-  return () => listeners.delete(fn);
+  return () => {
+    listeners.delete(fn);
+  };
 }
 
 /** Storage path for a photo: org / visit / unique file name. */
