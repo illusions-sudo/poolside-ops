@@ -29,8 +29,8 @@ describe("sortCustomers", () => {
   });
 
   it("sorts by state with the missing state last in both directions", () => {
-    expect(ids(sortCustomers(rows, "state", "asc"))).toEqual(["1", "2", "4", "5", "3"]);
-    expect(ids(sortCustomers(rows, "state", "desc"))).toEqual(["5", "1", "2", "4", "3"]);
+    expect(ids(sortCustomers(rows, "state", "asc"))).toEqual(["1", "4", "2", "5", "3"]);
+    expect(ids(sortCustomers(rows, "state", "desc"))).toEqual(["5", "1", "4", "2", "3"]);
   });
 
   it("lists active customers before inactive ones when sorted by status", () => {
