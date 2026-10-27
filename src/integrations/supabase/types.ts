@@ -1142,6 +1142,7 @@ export type Database = {
           price: number
           property_id: string
           service_name: string
+          service_type: string | null
           status: string
           technician_id: string | null
           updated_at: string
@@ -1165,6 +1166,7 @@ export type Database = {
           price?: number
           property_id: string
           service_name: string
+          service_type?: string | null
           status?: string
           technician_id?: string | null
           updated_at?: string
@@ -1188,6 +1190,7 @@ export type Database = {
           price?: number
           property_id?: string
           service_name?: string
+          service_type?: string | null
           status?: string
           technician_id?: string | null
           updated_at?: string
