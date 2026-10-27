@@ -10,6 +10,7 @@ import {
   getServerQueueState,
   subscribeQueue,
 } from "@/lib/offline-queue";
+import { countQueuedPhotos, flushPhotos, subscribePhotoQueue } from "@/lib/offline-photos";
 
 function useOnline() {
   const [online, setOnline] = useState(true);
@@ -31,15 +32,23 @@ export function OfflineSync() {
   const queryClient = useQueryClient();
   const online = useOnline();
   const q = useSyncExternalStore(subscribeQueue, getQueueState, getServerQueueState);
+  const [photoCount, setPhotoCount] = useState(0);
+  useEffect(() => {
+    const update = () => void countQueuedPhotos().then(setPhotoCount).catch(() => undefined);
+    update();
+    return subscribePhotoQueue(update);
+  }, []);
 
   useEffect(() => {
     if (!online) return;
     let cancelled = false;
     const run = async () => {
       const sent = await flushQueue();
+      const sentPhotos = await flushPhotos();
       if (cancelled) return;
-      if (sent > 0) {
-        toast.success(`Synced ${sent} saved change${sent === 1 ? "" : "s"}.`);
+      const total = sent + sentPhotos;
+      if (total > 0) {
+        toast.success(`Synced ${total} saved item${total === 1 ? "" : "s"}.`);
         await queryClient.invalidateQueries();
       }
     };
@@ -62,12 +71,13 @@ export function OfflineSync() {
   }, [online]);
 
   const pending = q.pending.length;
+  const waiting = pending + photoCount;
 
-  if (online && pending === 0 && q.failed.length === 0) return null;
+  if (online && waiting === 0 && q.failed.length === 0) return null;
 
   return (
     <div className="no-print space-y-2 px-4 pt-3 sm:px-6">
-      {!online || pending > 0 ? (
+      {!online || waiting > 0 ? (
         <div className="flex items-center gap-2 rounded-md border border-border bg-muted px-3 py-2 text-sm">
           {!online ? (
             <CloudOff className="size-4 shrink-0 text-muted-foreground" />
@@ -77,17 +87,23 @@ export function OfflineSync() {
             <RefreshCw className="size-4 shrink-0 text-primary" />
           )}
           <span className="min-w-0 flex-1">
-            {!online ? "You're offline. Visit work is saved on this phone" : "Back online"}
-            {pending > 0
-              ? ` — ${pending} change${pending === 1 ? "" : "s"} waiting to sync.`
+            {!online
+              ? "You're offline. Visit work and photos are saved on this phone"
+              : "Back online"}
+            {waiting > 0
+              ? ` — ${waiting} item${waiting === 1 ? "" : "s"} waiting to sync.`
               : !online
                 ? " and will sync when you have signal."
                 : "."}
           </span>
-          {online && pending > 0 && !q.syncing ? (
+          {online && waiting > 0 && !q.syncing ? (
             <button
               className="text-xs font-medium text-primary"
-              onClick={() => void flushQueue().then(() => queryClient.invalidateQueries())}
+              onClick={() =>
+                void Promise.all([flushQueue(), flushPhotos()]).then(() =>
+                  queryClient.invalidateQueries(),
+                )
+              }
             >
               Sync now
             </button>
