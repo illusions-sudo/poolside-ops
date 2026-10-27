@@ -117,7 +117,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-screen bg-background">
-      <aside className="fixed inset-y-0 left-0 z-30 hidden w-60 flex-col bg-sidebar lg:flex">
+      <aside className="no-print fixed inset-y-0 left-0 z-30 hidden w-60 flex-col bg-sidebar lg:flex">
         <Brand name={orgName} />
         <NavLinks items={nav} />
         <div className="px-4 pb-4 text-[11px] text-sidebar-foreground/50">
@@ -125,7 +125,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
       </aside>
 
-      <div className="lg:pl-60">
+      <div className="lg:pl-60 print:pl-0">
         <header className="sticky top-0 z-20 flex h-[calc(3.5rem+env(safe-area-inset-top))] items-center gap-2 border-b border-border bg-card/95 px-3 pt-[env(safe-area-inset-top)] backdrop-blur sm:px-6 no-print">
           <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
             <SheetTrigger asChild>
@@ -187,8 +187,8 @@ export function AppShell({ children }: { children: ReactNode }) {
           </div>
         </header>
 
-        <OfflineSync />
-        <main className="mx-auto w-full max-w-[1400px] px-4 py-6 pb-24 sm:px-6 lg:py-8 lg:pb-8">
+        <div className="no-print"><OfflineSync /></div>
+        <main className="mx-auto w-full max-w-[1400px] px-4 py-6 pb-24 sm:px-6 lg:py-8 lg:pb-8 print:max-w-none print:p-0">
           {children}
         </main>
 

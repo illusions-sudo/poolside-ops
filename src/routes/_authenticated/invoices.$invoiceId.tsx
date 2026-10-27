@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { Ban, Loader2, Pencil, Plus, Printer, Send, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { InvoiceDialog } from "@/components/invoices/invoice-dialog";
@@ -39,7 +39,19 @@ export const Route = createFileRoute("/_authenticated/invoices/$invoiceId")({
 
 function InvoiceDetail() {
   const { invoiceId } = Route.useParams();
-  const { isAdmin } = useAuth();
+  const { isAdmin, organization } = useAuth();
+  const [logoUrl, setLogoUrl] = useState<string | null>(null);
+  useEffect(() => {
+    const path = organization?.logo_url;
+    if (!path) {
+      setLogoUrl(null);
+      return;
+    }
+    void supabase.storage
+      .from("company-logos")
+      .createSignedUrl(path, 3600)
+      .then(({ data }) => setLogoUrl(data?.signedUrl ?? null));
+  }, [organization?.logo_url]);
   const queryClient = useQueryClient();
 
   const [editOpen, setEditOpen] = useState(false);
@@ -163,6 +175,17 @@ function InvoiceDetail() {
 
   return (
     <AppShell>
+      <InvoiceLetterhead
+        org={organization}
+        logoUrl={logoUrl}
+        number={inv.invoice_number}
+        status={inv.status}
+        billTo={customerName(inv.customers)}
+        billEmail={inv.customers?.email ?? null}
+        issued={shortDate(inv.invoice_date)}
+        due={shortDate(inv.due_date)}
+      />
+      <div className="no-print">
       <PageHeader
         title={`Invoice ${inv.invoice_number}`}
         description={`${customerName(inv.customers)} · issued ${shortDate(inv.invoice_date)} · due ${shortDate(inv.due_date)}`}
@@ -204,9 +227,10 @@ function InvoiceDetail() {
           </div>
         }
       />
+      </div>
 
-      <div className="grid gap-4 lg:grid-cols-3">
-        <div className="space-y-4 lg:col-span-2">
+      <div className="grid gap-4 lg:grid-cols-3 print:grid-cols-3">
+        <div className="space-y-4 lg:col-span-2 print:col-span-2">
           <div className="panel overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
@@ -216,7 +240,7 @@ function InvoiceDetail() {
                     <th className="px-4 py-2.5 font-medium">Qty</th>
                     <th className="px-4 py-2.5 font-medium">Rate</th>
                     <th className="px-4 py-2.5 font-medium">Amount</th>
-                    {canEditItems ? <th className="px-4 py-2.5" /> : null}
+                    {canEditItems ? <th className="no-print px-4 py-2.5" /> : null}
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
@@ -237,7 +261,7 @@ function InvoiceDetail() {
                         <td className="num px-4 py-3">{money(it.unit_price)}</td>
                         <td className="num px-4 py-3">{money(it.total)}</td>
                         {canEditItems ? (
-                          <td className="px-4 py-3 text-right">
+                          <td className="no-print px-4 py-3 text-right">
                             <Button
                               variant="ghost"
                               size="icon"
@@ -258,7 +282,7 @@ function InvoiceDetail() {
 
           {canEditItems ? (
             <form
-              className="panel grid gap-3 p-4 sm:grid-cols-[1fr_5rem_7rem_auto] sm:items-end"
+              className="no-print panel grid gap-3 p-4 sm:grid-cols-[1fr_5rem_7rem_auto] sm:items-end"
               onSubmit={(e) => {
                 e.preventDefault();
                 if (!item.description.trim()) {
@@ -347,6 +371,7 @@ function InvoiceDetail() {
                       <span className="num text-foreground">{money(p.amount)}</span>
                       {isAdmin ? (
                         <Button
+                          className="no-print"
                           variant="ghost"
                           size="icon"
                           aria-label="Remove payment"
@@ -435,6 +460,63 @@ function Row({ label, value, bold }: { label: string; value: string; bold?: bool
     <div className="flex items-center justify-between">
       <span className="text-muted-foreground">{label}</span>
       <span className={bold ? "num font-semibold" : "num"}>{value}</span>
+    </div>
+  );
+}
+
+function InvoiceLetterhead({
+  org,
+  logoUrl,
+  number,
+  status,
+  billTo,
+  billEmail,
+  issued,
+  due,
+}: {
+  org: ReturnType<typeof useAuth>["organization"];
+  logoUrl: string | null;
+  number: string;
+  status: string;
+  billTo: string;
+  billEmail: string | null;
+  issued: string;
+  due: string;
+}) {
+  const name = org?.business_name || org?.name || "";
+  const cityLine = [org?.city, [org?.state, org?.zip].filter(Boolean).join(" ")]
+    .filter(Boolean)
+    .join(", ");
+  return (
+    <div className="mb-6 hidden print:block">
+      <div className="flex items-start justify-between gap-6 border-b border-border pb-4">
+        <div className="flex items-start gap-4">
+          {logoUrl ? (
+            <img src={logoUrl} alt={`${name} logo`} className="h-20 w-auto max-w-[180px] object-contain" />
+          ) : null}
+          <div className="text-sm leading-relaxed">
+            <div className="text-lg font-semibold">{name}</div>
+            {org?.address ? <div>{org.address}</div> : null}
+            {cityLine ? <div>{cityLine}</div> : null}
+            {org?.phone ? <div>{org.phone}</div> : null}
+            {org?.email ? <div>{org.email}</div> : null}
+            {org?.website ? <div>{org.website}</div> : null}
+          </div>
+        </div>
+        <div className="text-right text-sm leading-relaxed">
+          <div className="text-2xl font-semibold tracking-tight">INVOICE</div>
+          <div>No. {number}</div>
+          <div>Issued {issued}</div>
+          <div>Due {due}</div>
+          {status === "void" ? <div className="font-semibold">VOID</div> : null}
+          {status === "paid" ? <div className="font-semibold">PAID</div> : null}
+        </div>
+      </div>
+      <div className="mt-4 text-sm">
+        <div className="text-xs uppercase tracking-wide text-muted-foreground">Bill to</div>
+        <div className="font-medium">{billTo}</div>
+        {billEmail ? <div>{billEmail}</div> : null}
+      </div>
     </div>
   );
 }
