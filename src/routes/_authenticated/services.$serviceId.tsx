@@ -44,6 +44,8 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { patchServiceCache } from "@/lib/offline-cache";
+import { newId, runWrite } from "@/lib/offline-queue";
 import type { Database } from "@/integrations/supabase/types";
 import {
   CHEMICAL_UNITS,
