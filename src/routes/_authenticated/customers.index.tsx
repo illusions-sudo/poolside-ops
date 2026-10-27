@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Download, Loader2, Plus, Search, Users } from "lucide-react";
-import { useMemo, useState } from "react";
+import { ArrowDown, ArrowUp, ArrowUpDown, Download, Loader2, Plus, Search, Users } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
 import { AppShell } from "@/components/shell/app-shell";
@@ -10,10 +10,24 @@ import { EmptyState, ErrorState, LoadingRows } from "@/components/shell/empty-st
 import { PageHeader } from "@/components/shell/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import {
+  CUSTOMER_SORT_OPTIONS,
+  sortCustomers,
+  type CustomerSortKey,
+  type SortDirection,
+} from "@/lib/customer-sort";
 import { customerName, downloadCsv, friendlyError } from "@/lib/format";
+import { SortableTh } from "@/components/customers/sortable-header";
 
 export const Route = createFileRoute("/_authenticated/customers/")({
   head: () => ({
@@ -30,12 +44,43 @@ export const Route = createFileRoute("/_authenticated/customers/")({
   component: CustomersPage,
 });
 
+const SORT_STORAGE_KEY = "poolside-customers-sort-v1";
+
 function CustomersPage() {
   const { isAdmin } = useAuth();
   const queryClient = useQueryClient();
   const [term, setTerm] = useState("");
   const [scope, setScope] = useState<"active" | "inactive" | "all">("active");
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [sortKey, setSortKey] = useState<CustomerSortKey>("name");
+  const [sortDir, setSortDir] = useState<SortDirection>("asc");
+
+  // Restore the last sort choice after hydration so the page never mismatches the server render.
+  useEffect(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem(SORT_STORAGE_KEY) ?? "{}") as {
+        key?: CustomerSortKey;
+        dir?: SortDirection;
+      };
+      if (saved.key && CUSTOMER_SORT_OPTIONS.some((o) => o.key === saved.key)) setSortKey(saved.key);
+      if (saved.dir === "asc" || saved.dir === "desc") setSortDir(saved.dir);
+    } catch {
+      // A damaged saved choice just means the default sort stays.
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem(SORT_STORAGE_KEY, JSON.stringify({ key: sortKey, dir: sortDir }));
+  }, [sortKey, sortDir]);
+
+  const toggleSort = (key: CustomerSortKey) => {
+    if (key === sortKey) {
+      setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+      return;
+    }
+    setSortKey(key);
+    setSortDir(key === "created" ? "desc" : "asc");
+  };
 
   const customers = useQuery({
     queryKey: ["customers", scope],
@@ -43,7 +88,7 @@ function CustomersPage() {
       let q = supabase
         .from("customers")
         .select(
-          "id, first_name, last_name, company_name, email, phone, billing_city, billing_state, active, properties(count)",
+          "id, first_name, last_name, company_name, email, phone, billing_city, billing_state, active, created_at, properties(count)",
         )
         .order("created_at", { ascending: false });
       if (scope !== "all") q = q.eq("active", scope === "active");
@@ -68,13 +113,15 @@ function CustomersPage() {
   const rows = useMemo(() => {
     const list = customers.data ?? [];
     const t = term.trim().toLowerCase();
-    if (!t) return list;
-    return list.filter((c) =>
-      [c.first_name, c.last_name, c.company_name, c.email, c.phone]
-        .filter(Boolean)
-        .some((v) => String(v).toLowerCase().includes(t)),
-    );
-  }, [customers.data, term]);
+    const filtered = t
+      ? list.filter((c) =>
+          [c.first_name, c.last_name, c.company_name, c.email, c.phone]
+            .filter(Boolean)
+            .some((v) => String(v).toLowerCase().includes(t)),
+        )
+      : list;
+    return sortCustomers(filtered, sortKey, sortDir);
+  }, [customers.data, term, sortKey, sortDir]);
 
   return (
     <AppShell>
@@ -129,6 +176,41 @@ function CustomersPage() {
             <TabsTrigger value="all">All</TabsTrigger>
           </TabsList>
         </Tabs>
+        <div className="flex items-center gap-2 sm:ml-auto">
+          <span className="hidden text-xs font-medium uppercase tracking-wide text-muted-foreground sm:inline">
+            Sort
+          </span>
+          <Select value={sortKey} onValueChange={(v) => setSortKey(v as CustomerSortKey)}>
+            <SelectTrigger className="w-full sm:w-48" aria-label="Sort customers by">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {CUSTOMER_SORT_OPTIONS.map((o) => (
+                <SelectItem key={o.key} value={o.key}>
+                  {o.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Button
+            variant="outline"
+            size="icon"
+            className="size-11 shrink-0 sm:size-9"
+            title={sortDir === "asc" ? "Ascending order" : "Descending order"}
+            aria-label={
+              sortDir === "asc"
+                ? "Sorted ascending. Switch to descending."
+                : "Sorted descending. Switch to ascending."
+            }
+            onClick={() => setSortDir((d) => (d === "asc" ? "desc" : "asc"))}
+          >
+            {sortDir === "asc" ? (
+              <ArrowUp className="size-4" />
+            ) : (
+              <ArrowDown className="size-4" />
+            )}
+          </Button>
+        </div>
       </div>
 
       <div className="panel overflow-hidden">
@@ -161,10 +243,28 @@ function CustomersPage() {
             <table className="w-full text-sm">
               <thead className="border-b border-border bg-muted/40 text-left text-xs uppercase tracking-wide text-muted-foreground">
                 <tr>
-                  <th className="px-4 py-2.5 font-medium">Customer</th>
+                  <SortableTh
+                    label="Customer"
+                    sortKey="name"
+                    activeKey={sortKey}
+                    direction={sortDir}
+                    onSort={toggleSort}
+                  />
                   <th className="px-4 py-2.5 font-medium">Contact</th>
-                  <th className="px-4 py-2.5 font-medium">Location</th>
-                  <th className="px-4 py-2.5 font-medium">Properties</th>
+                  <SortableTh
+                    label="Location"
+                    sortKey="city"
+                    activeKey={sortKey}
+                    direction={sortDir}
+                    onSort={toggleSort}
+                  />
+                  <SortableTh
+                    label="Properties"
+                    sortKey="properties"
+                    activeKey={sortKey}
+                    direction={sortDir}
+                    onSort={toggleSort}
+                  />
                   <th className="px-4 py-2.5 text-right font-medium">Actions</th>
                 </tr>
               </thead>

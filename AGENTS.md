@@ -21,3 +21,7 @@
 <!-- LOVABLE:END:AGENTS -->
 
 Customer/property permanent deletion uses guarded database RPCs and DELETE triggers, with shared lifecycle controls; invoice-linked records remain inactive to prevent cascading loss of financial history.
+
+Sortable list pages order rows client-side with a pure comparator module under `src/lib` and the shared
+`SortableTh` header (see `src/lib/customer-sort.ts`), so sorting works offline and exports follow the
+on-screen order; the chosen sort is saved per page in localStorage and restored after hydration.
