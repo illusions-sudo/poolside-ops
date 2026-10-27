@@ -61,6 +61,7 @@ import {
   friendlyError,
   fullAddress,
   mapsHref,
+  openMapsDirections,
   personName,
   shortDate,
   telHref,
