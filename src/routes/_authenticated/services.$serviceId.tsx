@@ -203,7 +203,10 @@ function ServiceDetailPage() {
                 <Button
                   variant="outline"
                   disabled={!canEdit || setStatus.isPending}
-                  onClick={() => setStatus.mutate("en_route")}
+                  onClick={() => {
+                    setStatus.mutate("en_route");
+                    openMapsDirections(s.properties);
+                  }}
                 >
                   <Navigation className="mr-2 size-4" /> On my way
                 </Button>
