@@ -195,6 +195,7 @@ function CustomersPage() {
           <Button
             variant="outline"
             size="icon"
+            className="size-11 shrink-0 sm:size-9"
             title={sortDir === "asc" ? "Ascending order" : "Descending order"}
             aria-label={
               sortDir === "asc"
