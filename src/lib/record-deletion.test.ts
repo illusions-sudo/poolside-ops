@@ -14,17 +14,31 @@ describe.skipIf(!configured)("Inactive-only deletion (live authenticated databas
   let customerId = "";
   let propertyId = "";
   beforeAll(async () => {
-    const profile = await client.from("profiles").select("organization_id").eq("id", session.user.id).single();
+    const profile = await client
+      .from("profiles")
+      .select("organization_id")
+      .eq("id", session.user.id)
+      .single();
     if (profile.error) throw profile.error;
-    const customer = await client.from("customers").insert({
-      organization_id: profile.data.organization_id,
-      first_name: "Automated deletion guard test",
-    }).select("id").single();
+    const customer = await client
+      .from("customers")
+      .insert({
+        organization_id: profile.data.organization_id,
+        first_name: "Automated deletion guard test",
+      })
+      .select("id")
+      .single();
     if (customer.error) throw customer.error;
     customerId = customer.data.id;
-    const property = await client.from("properties").insert({
-      organization_id: profile.data.organization_id, customer_id: customerId, address: "Automated deletion guard test",
-    }).select("id").single();
+    const property = await client
+      .from("properties")
+      .insert({
+        organization_id: profile.data.organization_id,
+        customer_id: customerId,
+        address: "Automated deletion guard test",
+      })
+      .select("id")
+      .single();
     if (property.error) throw property.error;
     propertyId = property.data.id;
   });
