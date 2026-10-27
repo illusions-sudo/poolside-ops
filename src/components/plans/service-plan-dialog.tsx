@@ -3,6 +3,7 @@ import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
+import { ServiceTypePicker } from "@/components/plans/service-type-picker";
 import { ConfirmDialog } from "@/components/shell/confirm-dialog";
 import { Button } from "@/components/ui/button";
 import {
@@ -25,10 +26,8 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/hooks/useAuth";
 import {
-  poolLabel,
   propertyLabel,
   useCustomerOptions,
-  usePoolOptions,
   usePropertyOptions,
 } from "@/hooks/useEntityOptions";
 import { supabase } from "@/integrations/supabase/client";
@@ -79,6 +78,7 @@ export function ServicePlanDialog({
     customer_id: "",
     property_id: "",
     pool_id: "",
+    service_type: "",
     service_name: "Weekly pool maintenance",
     description: "",
     frequency: "weekly",
@@ -96,7 +96,6 @@ export function ServicePlanDialog({
 
   const customers = useCustomerOptions(open);
   const properties = usePropertyOptions(form.customer_id || undefined);
-  const pools = usePoolOptions(form.property_id || undefined);
   const technicians = useTechnicianOptions(open);
 
   useEffect(() => {
@@ -105,6 +104,7 @@ export function ServicePlanDialog({
       customer_id: plan?.customer_id ?? defaults?.customerId ?? "",
       property_id: plan?.property_id ?? defaults?.propertyId ?? "",
       pool_id: plan?.pool_id ?? defaults?.poolId ?? "",
+      service_type: plan?.service_type ?? "",
       service_name: plan?.service_name ?? "Weekly pool maintenance",
       description: plan?.description ?? "",
       frequency: plan?.frequency ?? "weekly",
@@ -130,6 +130,7 @@ export function ServicePlanDialog({
         customer_id: form.customer_id,
         property_id: form.property_id,
         pool_id: form.pool_id || null,
+        service_type: form.service_type || null,
         service_name: form.service_name.trim(),
         description: form.description.trim() || null,
         frequency: form.frequency,
@@ -235,23 +236,11 @@ export function ServicePlanDialog({
               </Select>
             </div>
             <div className="space-y-1.5">
-              <Label>Pool (optional)</Label>
-              <Select
-                value={form.pool_id}
-                disabled={!form.property_id}
-                onValueChange={(v) => setForm((f) => ({ ...f, pool_id: v }))}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="All pools" />
-                </SelectTrigger>
-                <SelectContent>
-                  {(pools.data ?? []).map((p) => (
-                    <SelectItem key={p.id} value={p.id}>
-                      {poolLabel(p)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Label>Pool or spa (optional)</Label>
+              <ServiceTypePicker
+                value={form.service_type}
+                onChange={(v) => setForm((f) => ({ ...f, service_type: v }))}
+              />
             </div>
           </div>
 
