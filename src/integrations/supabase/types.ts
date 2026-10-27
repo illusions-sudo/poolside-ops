@@ -194,6 +194,7 @@ export type Database = {
           position: number
           quantity: number
           service_plan_id: string | null
+          service_record_id: string | null
           total: number
           unit_price: number
         }
@@ -205,6 +206,7 @@ export type Database = {
           position?: number
           quantity?: number
           service_plan_id?: string | null
+          service_record_id?: string | null
           total?: number
           unit_price?: number
         }
@@ -216,6 +218,7 @@ export type Database = {
           position?: number
           quantity?: number
           service_plan_id?: string | null
+          service_record_id?: string | null
           total?: number
           unit_price?: number
         }
@@ -232,6 +235,13 @@ export type Database = {
             columns: ["service_plan_id"]
             isOneToOne: false
             referencedRelation: "service_plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoice_items_service_record_id_fkey"
+            columns: ["service_record_id"]
+            isOneToOne: false
+            referencedRelation: "service_records"
             referencedColumns: ["id"]
           },
         ]
