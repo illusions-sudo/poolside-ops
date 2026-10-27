@@ -21,6 +21,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { ServicePhotos } from "@/components/services/service-photos";
+import { ConfirmDialog } from "@/components/shell/confirm-dialog";
 import { AppShell } from "@/components/shell/app-shell";
 import { EmptyState, ErrorState, LoadingRows } from "@/components/shell/empty-state";
 import { PageHeader } from "@/components/shell/page-header";
@@ -477,6 +478,53 @@ function ServiceDetailPage() {
             onOpenChange={setSkipOpen}
             serviceId={serviceId}
             onSaved={invalidate}
+          />
+          <Dialog open={postponeOpen} onOpenChange={setPostponeOpen}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Postpone visit</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-2">
+                <Label htmlFor="postpone-date">New date</Label>
+                <Input
+                  id="postpone-date"
+                  type="date"
+                  value={newDate}
+                  onChange={(e) => setNewDate(e.target.value)}
+                />
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setPostponeOpen(false)}>
+                  Back
+                </Button>
+                <Button
+                  disabled={!newDate || newDate === s.service_date || postpone.isPending}
+                  onClick={() => postpone.mutate(newDate)}
+                >
+                  {postpone.isPending ? <Loader2 className="mr-2 size-4 animate-spin" /> : null}
+                  Move visit
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+          <ConfirmDialog
+            open={cancelOpen}
+            onOpenChange={setCancelOpen}
+            title="Cancel this visit?"
+            description="It stays in the history marked Cancelled. You can reopen it later."
+            confirmLabel="Cancel visit"
+            onConfirm={() => cancelVisit.mutate()}
+            pending={cancelVisit.isPending}
+          />
+          <ConfirmDialog
+            open={deleteOpen}
+            onOpenChange={setDeleteOpen}
+            title="Delete this visit for good?"
+            description="It's removed from the schedule and route. This can't be undone."
+            confirmLabel="Delete visit"
+            destructive
+            onConfirm={() => deleteVisit.mutate()}
+            pending={deleteVisit.isPending}
           />
         </>
       )}
