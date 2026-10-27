@@ -50,6 +50,16 @@ export function addDays(iso: string, days: number): string {
   return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, "0")}-${String(dt.getDate()).padStart(2, "0")}`;
 }
 
+// One month after the given date; an end-of-month date clamps to the next
+// month's last day (e.g. Jan 31 -> Feb 28/29).
+export function addMonths(iso: string, months: number): string {
+  const [y, m, d] = parts(iso);
+  const target = new Date(y, m - 1 + months, 1);
+  const lastDay = new Date(target.getFullYear(), target.getMonth() + 1, 0).getDate();
+  const day = Math.min(d, lastDay);
+  return `${target.getFullYear()}-${String(target.getMonth() + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+}
+
 export function daysOverdue(dueDate: string | null | undefined): number {
   if (!dueDate) return 0;
   const [y, m, d] = parts(dueDate);

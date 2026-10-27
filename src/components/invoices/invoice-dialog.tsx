@@ -28,7 +28,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { propertyLabel, useCustomerOptions, usePropertyOptions } from "@/hooks/useEntityOptions";
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
-import { addDays, customerName, friendlyError, money, shortDate, today } from "@/lib/format";
+import { addMonths, customerName, friendlyError, money, shortDate, today } from "@/lib/format";
 
 export type InvoiceRow = Database["public"]["Tables"]["invoices"]["Row"];
 
@@ -59,7 +59,7 @@ export function InvoiceDialog({
     customer_id: customerId ?? "",
     property_id: "",
     invoice_date: today(),
-    due_date: addDays(today(), 15),
+    due_date: addMonths(today(), 1),
     tax_rate: "0",
     discount: "0",
     notes: "",
@@ -108,12 +108,13 @@ export function InvoiceDialog({
       });
       return;
     }
-    const terms = organization?.default_payment_terms ?? 15;
+    // Due date defaults to one month after the invoice date; either field
+    // stays manually editable after that.
     setForm({
       customer_id: customerId ?? "",
       property_id: "",
       invoice_date: today(),
-      due_date: addDays(today(), terms),
+      due_date: addMonths(today(), 1),
       tax_rate: String(organization?.default_tax_rate ?? 0),
       discount: "0",
       notes: organization?.default_invoice_notes ?? "",
@@ -279,7 +280,17 @@ export function InvoiceDialog({
                 id="invoice_date"
                 type="date"
                 value={form.invoice_date}
-                onChange={(e) => setForm((f) => ({ ...f, invoice_date: e.target.value }))}
+                onChange={(e) =>
+                  setForm((f) => ({
+                    ...f,
+                    invoice_date: e.target.value,
+                    // Keep the due date one month after the invoice date
+                    // until it is edited by hand.
+                    due_date: f.due_date === addMonths(f.invoice_date, 1)
+                      ? addMonths(e.target.value, 1)
+                      : f.due_date,
+                  }))
+                }
                 disabled={financialsLocked}
                 required
               />
