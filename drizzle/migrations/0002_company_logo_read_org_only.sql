@@ -1,0 +1,2 @@
+DROP POLICY IF EXISTS "company logos read" ON storage.objects;
+CREATE POLICY "company logos read" ON storage.objects FOR SELECT TO authenticated USING (bucket_id = 'company-logos' AND (storage.foldername(name))[1] = (public.current_org_id())::text);
