@@ -147,6 +147,11 @@ export const PLAN_STATUS_LABELS: Record<string, string> = {
   cancelled: "Cancelled",
 };
 
+export const SERVICE_TYPE_LABELS: Record<string, string> = {
+  pool: "Pool",
+  spa: "Spa",
+};
+
 export const ROLE_LABELS: Record<string, string> = {
   owner: "Owner",
   admin: "Administrator",
