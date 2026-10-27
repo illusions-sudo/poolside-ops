@@ -3,6 +3,7 @@ import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
+import { ConfirmDialog } from "@/components/shell/confirm-dialog";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -60,6 +61,20 @@ export function ServicePlanDialog({
 }) {
   const { organization } = useAuth();
   const queryClient = useQueryClient();
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const remove = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase.rpc("delete_service_plan", { p_plan_id: plan!.id });
+      if (error) throw error;
+    },
+    onSuccess: async () => {
+      toast.success("Service plan deleted.");
+      setDeleteOpen(false);
+      onOpenChange(false);
+      await queryClient.invalidateQueries();
+    },
+    onError: (e) => toast.error(friendlyError(e, "We couldn't delete that service plan.")),
+  });
   const [form, setForm] = useState({
     customer_id: "",
     property_id: "",
@@ -439,6 +454,16 @@ export function ServicePlanDialog({
           </div>
 
           <DialogFooter>
+            {plan?.id ? (
+              <Button
+                type="button"
+                variant="destructive"
+                className="sm:mr-auto"
+                onClick={() => setDeleteOpen(true)}
+              >
+                Delete plan
+              </Button>
+            ) : null}
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
@@ -448,6 +473,16 @@ export function ServicePlanDialog({
             </Button>
           </DialogFooter>
         </form>
+        <ConfirmDialog
+          open={deleteOpen}
+          onOpenChange={setDeleteOpen}
+          title="Delete this service plan?"
+          description="Upcoming visits from this plan will be removed from the schedule. Finished visits and invoices are kept. You can create a new plan again in the spring."
+          confirmLabel="Delete plan"
+          destructive
+          pending={remove.isPending}
+          onConfirm={() => remove.mutate()}
+        />
       </DialogContent>
     </Dialog>
   );

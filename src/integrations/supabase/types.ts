@@ -1393,6 +1393,7 @@ export type Database = {
         Returns: string
       }
       current_org_id: { Args: never; Returns: string }
+      delete_service_plan: { Args: { p_plan_id: string }; Returns: undefined }
       generate_service_records: { Args: { p_weeks?: number }; Returns: number }
       has_role: {
         Args: {
