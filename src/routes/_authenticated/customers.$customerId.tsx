@@ -118,8 +118,13 @@ function CustomerDetail() {
             actions={
               isAdmin ? (
                 <>
-                  <RecordLifecycleActions kind="customer" id={c.id} active={c.active} name={customerName(c)}
-                    onDeleted={() => void navigate({ to: "/customers" })} />
+                  <RecordLifecycleActions
+                    kind="customer"
+                    id={c.id}
+                    active={c.active}
+                    name={customerName(c)}
+                    onDeleted={() => void navigate({ to: "/customers" })}
+                  />
                   <Button variant="outline" onClick={() => setEditOpen(true)}>
                     <Pencil className="mr-2 size-4" /> Edit
                   </Button>
@@ -132,7 +137,9 @@ function CustomerDetail() {
           />
 
           <div className="grid gap-6 lg:grid-cols-3">
-            {!c.active ? <p className="text-sm text-muted-foreground lg:col-span-3">Inactive customer</p> : null}
+            {!c.active ? (
+              <p className="text-sm text-muted-foreground lg:col-span-3">Inactive customer</p>
+            ) : null}
             <section className="panel p-4">
               <h2 className="font-display text-sm font-semibold">Billing</h2>
               <dl className="mt-3 space-y-2 text-sm">
