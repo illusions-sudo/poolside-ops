@@ -383,8 +383,9 @@ export function openMapsDirections(
     | null
     | undefined,
 ): void {
-  const href = mapsHref(p);
-  if (!href) return;
+  const dest = fullAddress(p);
+  if (!dest) return;
+  const href = `https://maps.apple.com/?daddr=${encodeURIComponent(dest)}&dirflg=d`;
   const isIos =
     typeof navigator !== "undefined" && /iPad|iPhone|iPod/.test(navigator.userAgent);
   if (isIos) {
