@@ -177,9 +177,11 @@ function CustomersPage() {
           </TabsList>
         </Tabs>
         <div className="flex items-center gap-2 sm:ml-auto">
+          <span className="hidden text-xs font-medium uppercase tracking-wide text-muted-foreground sm:inline">
+            Sort
+          </span>
           <Select value={sortKey} onValueChange={(v) => setSortKey(v as CustomerSortKey)}>
             <SelectTrigger className="w-full sm:w-48" aria-label="Sort customers by">
-              <span className="text-xs text-muted-foreground">Sort:</span>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
