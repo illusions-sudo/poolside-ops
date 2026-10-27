@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import type { Database } from "@/integrations/supabase/types";
 import { friendlyError } from "@/lib/format";
 
 const FIELDS = ["name", "email", "phone", "website", "address", "city", "state", "zip"] as const;
@@ -45,7 +46,7 @@ export function CompanyProfileForm() {
     },
   });
 
-  async function updateOrg(patch: Record<string, string | null>) {
+  async function updateOrg(patch: Database["public"]["Tables"]["organizations"]["Update"]) {
     const { error } = await supabase.from("organizations").update(patch).eq("id", organization!.id);
     if (error) throw error;
     await refresh();
@@ -54,13 +55,13 @@ export function CompanyProfileForm() {
 
   async function onSave(e: React.FormEvent) {
     e.preventDefault();
-    if (!form.name.trim()) return toast.error("Company name is required.");
+    if (!form.name.trim()) { toast.error("Company name is required."); return; }
     setSaving(true);
     try {
       await updateOrg(
         Object.fromEntries(
           FIELDS.map((f) => [f, f === "name" ? form.name.trim() : form[f].trim() || null]),
-        ),
+        ) as Database["public"]["Tables"]["organizations"]["Update"],
       );
       toast.success("Company profile saved.");
     } catch (err) {
@@ -74,8 +75,8 @@ export function CompanyProfileForm() {
     const file = e.target.files?.[0];
     e.target.value = "";
     if (!file || !organization) return;
-    if (!file.type.startsWith("image/")) return toast.error("Please choose an image file.");
-    if (file.size > 5 * 1024 * 1024) return toast.error("Logo must be under 5 MB.");
+    if (!file.type.startsWith("image/")) { toast.error("Please choose an image file."); return; }
+    if (file.size > 5 * 1024 * 1024) { toast.error("Logo must be under 5 MB."); return; }
     setUploading(true);
     try {
       const ext = file.name.split(".").pop()?.toLowerCase() || "png";
