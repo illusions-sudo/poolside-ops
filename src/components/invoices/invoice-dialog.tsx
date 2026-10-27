@@ -28,7 +28,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { propertyLabel, useCustomerOptions, usePropertyOptions } from "@/hooks/useEntityOptions";
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
-import { addDays, addMonths, customerName, friendlyError, money, shortDate, today } from "@/lib/format";
+import { addMonths, customerName, friendlyError, money, shortDate, today } from "@/lib/format";
 
 export type InvoiceRow = Database["public"]["Tables"]["invoices"]["Row"];
 
