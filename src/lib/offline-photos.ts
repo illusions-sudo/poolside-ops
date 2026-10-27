@@ -71,7 +71,7 @@ export function subscribePhotoQueue(fn: () => void) {
 
 /** Storage path for a photo: org / visit / unique file name. */
 export function buildPhotoPath(orgId: string, serviceId: string, fileName: string): string {
-  const ext = fileName.split(".").pop()?.toLowerCase() ?? "jpg";
+  const ext = fileName.includes(".") ? fileName.split(".").pop()!.toLowerCase() : "jpg";
   return `${orgId}/${serviceId}/${newId()}.${ext}`;
 }
 
