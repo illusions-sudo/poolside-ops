@@ -36,6 +36,13 @@
       "when": 1793124673562,
       "tag": "0004_delete_service_plan",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1793124863840,
+      "tag": "0005_delete_invoice",
+      "breakpoints": true
     }
   ]
 }
