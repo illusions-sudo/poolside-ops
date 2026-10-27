@@ -88,7 +88,7 @@ function CustomersPage() {
       let q = supabase
         .from("customers")
         .select(
-          "id, first_name, last_name, company_name, email, phone, billing_city, billing_state, active, properties(count)",
+          "id, first_name, last_name, company_name, email, phone, billing_city, billing_state, active, created_at, properties(count)",
         )
         .order("created_at", { ascending: false });
       if (scope !== "all") q = q.eq("active", scope === "active");
