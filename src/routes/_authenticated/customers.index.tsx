@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Download, Loader2, Plus, Search, Users } from "lucide-react";
-import { useMemo, useState } from "react";
+import { ArrowDown, ArrowUp, ArrowUpDown, Download, Loader2, Plus, Search, Users } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
 import { AppShell } from "@/components/shell/app-shell";
@@ -10,9 +10,22 @@ import { EmptyState, ErrorState, LoadingRows } from "@/components/shell/empty-st
 import { PageHeader } from "@/components/shell/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import {
+  CUSTOMER_SORT_OPTIONS,
+  sortCustomers,
+  type CustomerSortKey,
+  type SortDirection,
+} from "@/lib/customer-sort";
 import { customerName, downloadCsv, friendlyError } from "@/lib/format";
 
 export const Route = createFileRoute("/_authenticated/customers/")({
@@ -30,12 +43,43 @@ export const Route = createFileRoute("/_authenticated/customers/")({
   component: CustomersPage,
 });
 
+const SORT_STORAGE_KEY = "poolside-customers-sort-v1";
+
 function CustomersPage() {
   const { isAdmin } = useAuth();
   const queryClient = useQueryClient();
   const [term, setTerm] = useState("");
   const [scope, setScope] = useState<"active" | "inactive" | "all">("active");
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [sortKey, setSortKey] = useState<CustomerSortKey>("name");
+  const [sortDir, setSortDir] = useState<SortDirection>("asc");
+
+  // Restore the last sort choice after hydration so the page never mismatches the server render.
+  useEffect(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem(SORT_STORAGE_KEY) ?? "{}") as {
+        key?: CustomerSortKey;
+        dir?: SortDirection;
+      };
+      if (saved.key && CUSTOMER_SORT_OPTIONS.some((o) => o.key === saved.key)) setSortKey(saved.key);
+      if (saved.dir === "asc" || saved.dir === "desc") setSortDir(saved.dir);
+    } catch {
+      // A damaged saved choice just means the default sort stays.
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem(SORT_STORAGE_KEY, JSON.stringify({ key: sortKey, dir: sortDir }));
+  }, [sortKey, sortDir]);
+
+  const toggleSort = (key: CustomerSortKey) => {
+    if (key === sortKey) {
+      setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+      return;
+    }
+    setSortKey(key);
+    setSortDir(key === "created" ? "desc" : "asc");
+  };
 
   const customers = useQuery({
     queryKey: ["customers", scope],
@@ -68,13 +112,15 @@ function CustomersPage() {
   const rows = useMemo(() => {
     const list = customers.data ?? [];
     const t = term.trim().toLowerCase();
-    if (!t) return list;
-    return list.filter((c) =>
-      [c.first_name, c.last_name, c.company_name, c.email, c.phone]
-        .filter(Boolean)
-        .some((v) => String(v).toLowerCase().includes(t)),
-    );
-  }, [customers.data, term]);
+    const filtered = t
+      ? list.filter((c) =>
+          [c.first_name, c.last_name, c.company_name, c.email, c.phone]
+            .filter(Boolean)
+            .some((v) => String(v).toLowerCase().includes(t)),
+        )
+      : list;
+    return sortCustomers(filtered, sortKey, sortDir);
+  }, [customers.data, term, sortKey, sortDir]);
 
   return (
     <AppShell>
