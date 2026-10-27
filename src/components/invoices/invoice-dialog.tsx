@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -22,12 +22,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/hooks/useAuth";
 import { propertyLabel, useCustomerOptions, usePropertyOptions } from "@/hooks/useEntityOptions";
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
-import { addDays, customerName, friendlyError, today } from "@/lib/format";
+import { addDays, customerName, friendlyError, money, shortDate, today } from "@/lib/format";
 
 export type InvoiceRow = Database["public"]["Tables"]["invoices"]["Row"];
 
@@ -64,6 +65,30 @@ export function InvoiceDialog({
     notes: "",
   });
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [picked, setPicked] = useState<Record<string, boolean>>({});
+
+  // Finished visits for this customer that aren't on a live invoice yet.
+  const unbilled = useQuery({
+    queryKey: ["unbilled-visits", form.customer_id],
+    enabled: open && !invoice && !!form.customer_id,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("service_records")
+        .select(
+          "id, service_date, property_id, service_plans(service_name, price), invoice_items(id, invoices(status))",
+        )
+        .eq("customer_id", form.customer_id)
+        .eq("status", "completed")
+        .order("service_date");
+      if (error) throw error;
+      return (data ?? []).filter(
+        (r) => !(r.invoice_items ?? []).some((it) => it.invoices && it.invoices.status !== "void"),
+      );
+    },
+  });
+  useEffect(() => {
+    setPicked(Object.fromEntries((unbilled.data ?? []).map((r) => [r.id, true])));
+  }, [unbilled.data]);
 
   const customers = useCustomerOptions(open && !customerId);
   const properties = usePropertyOptions(form.customer_id || undefined);
@@ -140,6 +165,20 @@ export function InvoiceDialog({
         .select("id")
         .single();
       if (error) throw error;
+      const visits = (unbilled.data ?? []).filter((r) => picked[r.id]);
+      if (visits.length) {
+        const { error: itemErr } = await supabase.from("invoice_items").insert(
+          visits.map((r, i) => ({
+            invoice_id: data.id,
+            service_record_id: r.id,
+            description: `${r.service_plans?.service_name ?? "Pool service"} — ${shortDate(r.service_date)}`,
+            quantity: 1,
+            unit_price: Number(r.service_plans?.price ?? 0),
+            position: i,
+          })),
+        );
+        if (itemErr) throw itemErr;
+      }
       return data.id;
     },
     onSuccess: async (id) => {
@@ -285,6 +324,36 @@ export function InvoiceDialog({
             </div>
           </div>
 
+          {!invoice && form.customer_id ? (
+            <div className="space-y-2 rounded-md border border-border p-3">
+              <Label>Finished work to bill</Label>
+              {unbilled.isLoading ? (
+                <p className="text-sm text-muted-foreground">Looking for finished visits…</p>
+              ) : (unbilled.data ?? []).length === 0 ? (
+                <p className="text-sm text-muted-foreground">
+                  No finished visits waiting to be billed. You can add line items after creating.
+                </p>
+              ) : (
+                <ul className="space-y-1.5">
+                  {(unbilled.data ?? []).map((r) => (
+                    <li key={r.id} className="flex items-center gap-2 text-sm">
+                      <Checkbox
+                        id={`v-${r.id}`}
+                        checked={!!picked[r.id]}
+                        onCheckedChange={(c) => setPicked((p) => ({ ...p, [r.id]: c === true }))}
+                      />
+                      <label htmlFor={`v-${r.id}`} className="flex flex-1 justify-between gap-2">
+                        <span>
+                          {r.service_plans?.service_name ?? "Pool service"} · {shortDate(r.service_date)}
+                        </span>
+                        <span className="num">{money(r.service_plans?.price ?? 0)}</span>
+                      </label>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          ) : null}
           <div className="space-y-1.5">
             <Label htmlFor="notes">Notes shown on the invoice</Label>
             <Textarea
