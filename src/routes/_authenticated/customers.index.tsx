@@ -27,6 +27,7 @@ import {
   type SortDirection,
 } from "@/lib/customer-sort";
 import { customerName, downloadCsv, friendlyError } from "@/lib/format";
+import { SortableTh } from "@/components/customers/sortable-header";
 
 export const Route = createFileRoute("/_authenticated/customers/")({
   head: () => ({
@@ -175,6 +176,38 @@ function CustomersPage() {
             <TabsTrigger value="all">All</TabsTrigger>
           </TabsList>
         </Tabs>
+        <div className="flex items-center gap-2 sm:ml-auto">
+          <Select value={sortKey} onValueChange={(v) => setSortKey(v as CustomerSortKey)}>
+            <SelectTrigger className="w-full sm:w-48" aria-label="Sort customers by">
+              <span className="text-xs text-muted-foreground">Sort:</span>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {CUSTOMER_SORT_OPTIONS.map((o) => (
+                <SelectItem key={o.key} value={o.key}>
+                  {o.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Button
+            variant="outline"
+            size="icon"
+            title={sortDir === "asc" ? "Ascending order" : "Descending order"}
+            aria-label={
+              sortDir === "asc"
+                ? "Sorted ascending. Switch to descending."
+                : "Sorted descending. Switch to ascending."
+            }
+            onClick={() => setSortDir((d) => (d === "asc" ? "desc" : "asc"))}
+          >
+            {sortDir === "asc" ? (
+              <ArrowUp className="size-4" />
+            ) : (
+              <ArrowDown className="size-4" />
+            )}
+          </Button>
+        </div>
       </div>
 
       <div className="panel overflow-hidden">
@@ -207,10 +240,28 @@ function CustomersPage() {
             <table className="w-full text-sm">
               <thead className="border-b border-border bg-muted/40 text-left text-xs uppercase tracking-wide text-muted-foreground">
                 <tr>
-                  <th className="px-4 py-2.5 font-medium">Customer</th>
+                  <SortableTh
+                    label="Customer"
+                    sortKey="name"
+                    activeKey={sortKey}
+                    direction={sortDir}
+                    onSort={toggleSort}
+                  />
                   <th className="px-4 py-2.5 font-medium">Contact</th>
-                  <th className="px-4 py-2.5 font-medium">Location</th>
-                  <th className="px-4 py-2.5 font-medium">Properties</th>
+                  <SortableTh
+                    label="Location"
+                    sortKey="city"
+                    activeKey={sortKey}
+                    direction={sortDir}
+                    onSort={toggleSort}
+                  />
+                  <SortableTh
+                    label="Properties"
+                    sortKey="properties"
+                    activeKey={sortKey}
+                    direction={sortDir}
+                    onSort={toggleSort}
+                  />
                   <th className="px-4 py-2.5 text-right font-medium">Actions</th>
                 </tr>
               </thead>
