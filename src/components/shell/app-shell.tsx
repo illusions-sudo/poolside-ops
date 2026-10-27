@@ -141,10 +141,12 @@ export function AppShell({ children }: { children: ReactNode }) {
 
           <button
             onClick={() => setSearchOpen(true)}
-            className="flex h-9 flex-1 items-center gap-2 rounded-md border border-input bg-background px-3 text-sm text-muted-foreground transition-colors hover:bg-accent/40 sm:max-w-sm"
+            className="flex h-9 min-w-0 flex-1 items-center gap-2 rounded-md border border-input bg-background px-3 text-sm text-muted-foreground transition-colors hover:bg-accent/40 sm:max-w-sm"
           >
-            <Search className="size-4" />
-            Search customers, invoices, properties…
+            <Search className="size-4 shrink-0" />
+            <span className="truncate whitespace-nowrap">
+              Search customers, invoices, properties…
+            </span>
           </button>
 
           <div className="ml-auto flex items-center gap-2">
