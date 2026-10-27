@@ -8,6 +8,20 @@
       "when": 1793122449645,
       "tag": "0000_fix_service_plan_org_check",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1793123612455,
+      "tag": "0001_company_logo_storage_policies",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1793123630372,
+      "tag": "0002_company_logo_read_org_only",
+      "breakpoints": true
     }
   ]
 }

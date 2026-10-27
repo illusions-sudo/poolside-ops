@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 
+import { CompanyProfileForm } from "@/components/settings/company-profile-form";
 import { AppShell } from "@/components/shell/app-shell";
 import { PageHeader } from "@/components/shell/page-header";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -25,7 +26,7 @@ export const Route = createFileRoute("/_authenticated/settings")({
 
 function SettingsPage() {
   const { tab } = Route.useSearch();
-  const { organization, profile, role } = useAuth();
+  const { profile, role } = useAuth();
 
   const team = useQuery({
     queryKey: ["team"],
@@ -64,16 +65,8 @@ function SettingsPage() {
           <TabsTrigger value="account">Account</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="company" className="panel mt-4 space-y-2 p-4 text-sm">
-          <Field label="Company" value={organization?.name ?? "—"} />
-          <Field label="Email" value={organization?.email ?? "—"} />
-          <Field label="Phone" value={organization?.phone ?? "—"} />
-          <Field
-            label="Default tax rate"
-            value={
-              organization?.default_tax_rate != null ? `${organization.default_tax_rate}%` : "—"
-            }
-          />
+        <TabsContent value="company" className="panel mt-4 p-4 text-sm">
+          <CompanyProfileForm />
         </TabsContent>
 
         <TabsContent value="team" className="panel mt-4 overflow-hidden">

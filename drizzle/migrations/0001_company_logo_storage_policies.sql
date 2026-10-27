@@ -1,0 +1,4 @@
+CREATE POLICY "company logos read" ON storage.objects FOR SELECT USING (bucket_id = 'company-logos');
+CREATE POLICY "company logos insert" ON storage.objects FOR INSERT TO authenticated WITH CHECK (bucket_id = 'company-logos' AND (storage.foldername(name))[1] = (public.current_org_id())::text AND public.is_org_admin());
+CREATE POLICY "company logos update" ON storage.objects FOR UPDATE TO authenticated USING (bucket_id = 'company-logos' AND (storage.foldername(name))[1] = (public.current_org_id())::text AND public.is_org_admin());
+CREATE POLICY "company logos delete" ON storage.objects FOR DELETE TO authenticated USING (bucket_id = 'company-logos' AND (storage.foldername(name))[1] = (public.current_org_id())::text AND public.is_org_admin());
