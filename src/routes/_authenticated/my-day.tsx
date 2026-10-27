@@ -20,6 +20,8 @@ import { StatusBadge } from "@/components/shell/status-badge";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { patchServiceCache } from "@/lib/offline-cache";
+import { runWrite } from "@/lib/offline-queue";
 import type { Database } from "@/integrations/supabase/types";
 import {
   addDays,
@@ -91,10 +93,20 @@ function MyDayPage() {
       const patch: Database["public"]["Tables"]["service_records"]["Update"] = { status };
       if (status === "in_progress") patch.started_at = new Date().toISOString();
       if (status === "completed") patch.completed_at = new Date().toISOString();
-      const { error } = await supabase.from("service_records").update(patch).eq("id", id);
-      if (error) throw error;
+      const { queued } = await runWrite({
+        table: "service_records",
+        kind: "update",
+        rowId: id,
+        values: patch,
+      });
+      patchServiceCache(queryClient, id, patch);
+      return queued;
     },
-    onSuccess: async () => {
+    onSuccess: async (queued) => {
+      if (queued) {
+        toast.success("Saved on this phone — will sync when you have signal.");
+        return;
+      }
       await queryClient.invalidateQueries({ queryKey: ["my-day"] });
     },
     onError: (e) => toast.error(friendlyError(e, "We couldn't update that stop.")),

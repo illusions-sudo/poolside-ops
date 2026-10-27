@@ -3,7 +3,12 @@ import { createRouter } from "@tanstack/react-router";
 import { routeTree } from "./routeTree.gen";
 
 export const getRouter = () => {
-  const queryClient = new QueryClient();
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      // Keep fetched data around (and saved on the device) so field screens work offline.
+      queries: { gcTime: 1000 * 60 * 60 * 24 * 7 },
+    },
+  });
 
   const router = createRouter({
     routeTree,

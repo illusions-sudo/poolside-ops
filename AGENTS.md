@@ -11,9 +11,11 @@
 
 <!-- LOVABLE:BEGIN:AGENTS -->
 > [!IMPORTANT]
-> Phone installs are manifest-only: `public/manifest.webmanifest` plus icons in
-> `public/icons/` and `public/apple-touch-icon.png`, with no service worker, no
-> `vite-plugin-pwa` and no offline caching. Keep it that way unless offline use
-> is explicitly requested, and keep the manifest landing page pointing at the
-> signed-in app rather than the marketing page.
+> Offline mode uses `vite-plugin-pwa` (generateSW, output `dist/client/sw.js`) registered only from
+> `src/lib/register-sw.ts`, which refuses dev/preview/iframe hosts; pages are NetworkFirst, never
+> cache-first. Keep the manifest landing page pointing at the signed-in app.
+> Field (visit) writes go through `runWrite` in `src/lib/offline-queue.ts` so they queue on the device
+> when offline and replay in order; patch the React Query cache after queuing so the change shows.
+> Query data is persisted to localStorage via PersistQueryClientProvider in `__root.tsx`.
+> Photo uploads still require a connection.
 <!-- LOVABLE:END:AGENTS -->
