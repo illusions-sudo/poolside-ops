@@ -22,6 +22,13 @@
       "when": 1793123630372,
       "tag": "0002_company_logo_read_org_only",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1793124423269,
+      "tag": "0003_invoice_items_service_record",
+      "breakpoints": true
     }
   ]
 }
