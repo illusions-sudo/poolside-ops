@@ -1397,6 +1397,10 @@ export type Database = {
       delete_invoice: { Args: { p_invoice_id: string }; Returns: undefined }
       delete_property: { Args: { p_property_id: string }; Returns: undefined }
       delete_service_plan: { Args: { p_plan_id: string }; Returns: undefined }
+      delete_service_record: {
+        Args: { p_service_id: string }
+        Returns: undefined
+      }
       generate_service_records: { Args: { p_weeks?: number }; Returns: number }
       has_role: {
         Args: {
