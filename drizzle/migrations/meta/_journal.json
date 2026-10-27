@@ -50,6 +50,13 @@
       "when": 1793126152237,
       "tag": "0006_inactive_customer_property_deletion",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1793131601383,
+      "tag": "0007_delete_service_record",
+      "breakpoints": true
     }
   ]
 }

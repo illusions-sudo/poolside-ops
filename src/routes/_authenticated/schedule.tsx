@@ -1,10 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { CalendarClock, ChevronLeft, ChevronRight, Loader2, Sparkles } from "lucide-react";
+import { CalendarClock, ChevronLeft, ChevronRight, Loader2, Sparkles, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
 import { AppShell } from "@/components/shell/app-shell";
+import { ConfirmDialog } from "@/components/shell/confirm-dialog";
 import { EmptyState, ErrorState, LoadingRows } from "@/components/shell/empty-state";
 import { PageHeader } from "@/components/shell/page-header";
 import { StatusBadge } from "@/components/shell/status-badge";
@@ -126,6 +127,20 @@ function SchedulePage() {
       await queryClient.invalidateQueries();
     },
     onError: (e) => toast.error(friendlyError(e, "We couldn't generate upcoming visits.")),
+  });
+
+  const [toDelete, setToDelete] = useState<Visit | null>(null);
+  const remove = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.rpc("delete_service_record", { p_service_id: id });
+      if (error) throw error;
+    },
+    onSuccess: async () => {
+      toast.success("Visit deleted.");
+      setToDelete(null);
+      await queryClient.invalidateQueries();
+    },
+    onError: (e) => toast.error(friendlyError(e, "We couldn't delete this visit.")),
   });
 
   const step = view === "day" ? 1 : view === "week" ? 7 : 30;
@@ -255,6 +270,18 @@ function SchedulePage() {
                           {customerName(v.customers)}
                         </Link>
                         <StatusBadge status={v.status} />
+                        {isAdmin && v.status !== "completed" ? (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="size-8 shrink-0 text-muted-foreground hover:text-destructive"
+                            aria-label="Delete visit"
+                            title="Cancel & delete visit"
+                            onClick={() => setToDelete(v)}
+                          >
+                            <Trash2 className="size-4" />
+                          </Button>
+                        ) : null}
                       </div>
                       <p className="truncate text-xs text-muted-foreground">
                         {v.scheduled_time ? `${clockTime(v.scheduled_time)} · ` : ""}
@@ -290,6 +317,20 @@ function SchedulePage() {
           />
         </div>
       ) : null}
+      <ConfirmDialog
+        open={!!toDelete}
+        onOpenChange={(o) => !o && setToDelete(null)}
+        title="Cancel and delete this visit?"
+        description={
+          toDelete
+            ? `${customerName(toDelete.customers)} on ${weekdayDate(toDelete.service_date)} will be removed from the schedule and routes for good, along with any notes or readings on it.`
+            : undefined
+        }
+        confirmLabel="Delete visit"
+        destructive
+        pending={remove.isPending}
+        onConfirm={() => toDelete && remove.mutate(toDelete.id)}
+      />
     </AppShell>
   );
 }
