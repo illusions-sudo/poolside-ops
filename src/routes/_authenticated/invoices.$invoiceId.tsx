@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Ban, Loader2, Pencil, Plus, Printer, Send, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -53,6 +53,8 @@ function InvoiceDetail() {
       .then(({ data }) => setLogoUrl(data?.signedUrl ?? null));
   }, [organization?.logo_url]);
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
+  const [deleteOpen, setDeleteOpen] = useState(false);
 
   const [editOpen, setEditOpen] = useState(false);
   const [payOpen, setPayOpen] = useState(false);
@@ -126,6 +128,20 @@ function InvoiceDetail() {
       await refresh();
     },
     onError: (e) => toast.error(friendlyError(e, "We couldn't remove that payment.")),
+  });
+
+  const deleteInvoice = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase.rpc("delete_invoice", { p_invoice_id: invoiceId });
+      if (error) throw error;
+    },
+    onSuccess: async () => {
+      setDeleteOpen(false);
+      toast.success("Invoice deleted.");
+      await queryClient.invalidateQueries();
+      void navigate({ to: "/invoices" });
+    },
+    onError: (e) => toast.error(friendlyError(e, "We couldn't delete this invoice.")),
   });
 
   const setStatus = useMutation({
@@ -222,6 +238,11 @@ function InvoiceDetail() {
             {isAdmin && !isVoid ? (
               <Button variant="outline" size="sm" onClick={() => setVoidOpen(true)}>
                 <Ban className="mr-1.5 size-4" /> Void
+              </Button>
+            ) : null}
+            {isAdmin && (isVoid || isDraft) && (inv.payments ?? []).length === 0 ? (
+              <Button variant="destructive" size="sm" onClick={() => setDeleteOpen(true)}>
+                <Trash2 className="mr-1.5 size-4" /> Delete
               </Button>
             ) : null}
           </div>
@@ -403,6 +424,16 @@ function InvoiceDetail() {
         invoiceId={inv.id}
         customerId={inv.customer_id}
         amountDue={num(inv.amount_due)}
+      />
+      <ConfirmDialog
+        open={deleteOpen}
+        onOpenChange={setDeleteOpen}
+        title="Delete this invoice for good?"
+        description="The invoice and its line items will be permanently removed. Any finished visits on it will show up again as ready to bill. This cannot be undone."
+        confirmLabel="Delete invoice"
+        destructive
+        pending={deleteInvoice.isPending}
+        onConfirm={() => deleteInvoice.mutate()}
       />
       <ConfirmDialog
         open={voidOpen}
