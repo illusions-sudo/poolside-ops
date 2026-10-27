@@ -26,7 +26,7 @@ export const Route = createFileRoute("/_authenticated/settings")({
 
 function SettingsPage() {
   const { tab } = Route.useSearch();
-  const { organization, profile, role } = useAuth();
+  const { profile, role } = useAuth();
 
   const team = useQuery({
     queryKey: ["team"],
