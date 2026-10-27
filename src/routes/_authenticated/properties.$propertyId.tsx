@@ -9,6 +9,7 @@ import { PageHeader } from "@/components/shell/page-header";
 import { RecordLifecycleActions } from "@/components/shell/record-lifecycle-actions";
 import { PoolDialog } from "@/components/pools/pool-dialog";
 import { PropertyDialog } from "@/components/properties/property-dialog";
+import { ServiceTypeBadge } from "@/components/plans/service-type-picker";
 import { StatusBadge } from "@/components/shell/status-badge";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
@@ -48,7 +49,7 @@ function PropertyDetail() {
         supabase.from("pools").select("*").eq("property_id", propertyId).order("created_at"),
         supabase
           .from("service_plans")
-          .select("id, service_name, frequency, price, status, next_service_date")
+          .select("id, service_name, service_type, frequency, price, status, next_service_date")
           .eq("property_id", propertyId),
         supabase
           .from("service_records")
@@ -208,7 +209,10 @@ function PropertyDetail() {
                   {q.data.plans.map((plan) => (
                     <li key={plan.id} className="flex items-center gap-3 px-4 py-3">
                       <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-medium">{plan.service_name}</p>
+                        <p className="flex items-center gap-2 text-sm font-medium">
+                          <span className="truncate">{plan.service_name}</span>
+                          <ServiceTypeBadge value={plan.service_type} />
+                        </p>
                         <p className="text-xs text-muted-foreground">
                           {FREQUENCY_LABELS[plan.frequency] ?? plan.frequency} · next{" "}
                           {shortDate(plan.next_service_date)}

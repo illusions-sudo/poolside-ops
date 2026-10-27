@@ -57,6 +57,13 @@
       "when": 1793131601383,
       "tag": "0007_delete_service_record",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1793132433123,
+      "tag": "0008_add_service_plan_service_type",
+      "breakpoints": true
     }
   ]
 }

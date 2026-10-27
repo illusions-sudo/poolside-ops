@@ -25,3 +25,7 @@ Customer/property permanent deletion uses guarded database RPCs and DELETE trigg
 Sortable list pages order rows client-side with a pure comparator module under `src/lib` and the shared
 `SortableTh` header (see `src/lib/customer-sort.ts`), so sorting works offline and exports follow the
 on-screen order; the chosen sort is saved per page in localStorage and restored after hydration.
+
+A plan's Pool/Spa choice is stored as `service_plans.service_type` and rendered everywhere through the
+shared `ServiceTypePicker` / `ServiceTypeBadge` in `src/components/plans/service-type-picker.tsx`, so a
+new surface never invents its own control or label wording for that choice.

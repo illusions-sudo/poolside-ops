@@ -10,6 +10,7 @@ import { PageHeader } from "@/components/shell/page-header";
 import { RecordLifecycleActions } from "@/components/shell/record-lifecycle-actions";
 import { PropertyDialog } from "@/components/properties/property-dialog";
 import { ServicePlanDialog } from "@/components/plans/service-plan-dialog";
+import { ServiceTypeBadge } from "@/components/plans/service-type-picker";
 import { StatusBadge } from "@/components/shell/status-badge";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
@@ -53,7 +54,7 @@ function CustomerDetail() {
           .order("address"),
         supabase
           .from("service_plans")
-          .select("id, service_name, frequency, price, status, next_service_date")
+          .select("id, service_name, service_type, frequency, price, status, next_service_date")
           .eq("customer_id", customerId)
           .order("created_at", { ascending: false }),
         supabase
@@ -221,7 +222,10 @@ function CustomerDetail() {
                   {q.data.plans.map((p) => (
                     <li key={p.id} className="flex items-center gap-3 px-4 py-3">
                       <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-medium">{p.service_name}</p>
+                        <p className="flex items-center gap-2 text-sm font-medium">
+                          <span className="truncate">{p.service_name}</span>
+                          <ServiceTypeBadge value={p.service_type} />
+                        </p>
                         <p className="text-xs text-muted-foreground">
                           {FREQUENCY_LABELS[p.frequency] ?? p.frequency} · next{" "}
                           {shortDate(p.next_service_date)}
