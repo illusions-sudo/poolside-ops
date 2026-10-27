@@ -17,7 +17,8 @@
 > Field (visit) writes go through `runWrite` in `src/lib/offline-queue.ts` so they queue on the device
 > when offline and replay in order; patch the React Query cache after queuing so the change shows.
 > Query data is persisted to localStorage via PersistQueryClientProvider in `__root.tsx`.
-> Photo uploads still require a connection.
+> Photos taken offline are stored in IndexedDB via `src/lib/offline-photos.ts` (blobs can't go in
+> localStorage) and uploaded when the signal returns; the visit page shows them as "Waiting to sync".
 <!-- LOVABLE:END:AGENTS -->
 
 Customer/property permanent deletion uses guarded database RPCs and DELETE triggers, with shared lifecycle controls; invoice-linked records remain inactive to prevent cascading loss of financial history.
