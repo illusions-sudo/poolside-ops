@@ -144,10 +144,20 @@ function ServiceDetailPage() {
         patch.skip_reason = null;
         patch.skip_note = null;
       }
-      const { error } = await supabase.from("service_records").update(patch).eq("id", serviceId);
-      if (error) throw error;
+      const { queued } = await runWrite({
+        table: "service_records",
+        kind: "update",
+        rowId: serviceId,
+        values: patch,
+      });
+      patchServiceCache(queryClient, serviceId, patch);
+      return queued;
     },
-    onSuccess: async () => {
+    onSuccess: async (queued) => {
+      if (queued) {
+        toast.success("Saved on this phone — will sync when you have signal.");
+        return;
+      }
       await invalidate();
       router.invalidate();
     },
@@ -410,14 +420,22 @@ function Checklist({ serviceId, canEdit }: { serviceId: string; canEdit: boolean
 
   const toggle = useMutation({
     mutationFn: async ({ id, completed }: { id: string; completed: boolean }) => {
-      const { error } = await supabase
-        .from("service_checklist_items")
-        .update({ completed, completed_at: completed ? new Date().toISOString() : null })
-        .eq("id", id);
-      if (error) throw error;
+      const { queued } = await runWrite({
+        table: "service_checklist_items",
+        kind: "update",
+        rowId: id,
+        values: { completed, completed_at: completed ? new Date().toISOString() : null },
+      });
+      queryClient.setQueryData(
+        ["service-checklist", serviceId],
+        (old: { id: string; completed: boolean }[] | undefined) =>
+          (old ?? []).map((i) => (i.id === id ? { ...i, completed } : i)),
+      );
+      return queued;
     },
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["service-checklist", serviceId] });
+    onSuccess: async (queued) => {
+      if (!queued)
+        await queryClient.invalidateQueries({ queryKey: ["service-checklist", serviceId] });
     },
     onError: (e) => toast.error(friendlyError(e, "We couldn't update the checklist.")),
   });
@@ -505,34 +523,47 @@ function Chemistry({
 
   const save = useMutation({
     mutationFn: async () => {
-      const payload: Database["public"]["Tables"]["service_chemistry_readings"]["Update"] = {
+      const payload: Record<string, number | null | string> = {
         notes: notes.trim() || null,
       };
-      const numeric = payload as Record<string, number | null | string>;
       for (const f of CHEMISTRY_FIELDS) {
         const raw = form[f.key];
-        numeric[f.key] = raw === undefined || raw === "" ? null : Number(raw);
+        payload[f.key] = raw === undefined || raw === "" ? null : Number(raw);
       }
-      if (reading.data?.id) {
-        const { error } = await supabase
-          .from("service_chemistry_readings")
-          .update(payload)
-          .eq("id", reading.data.id);
-        if (error) throw error;
+      const existingId = reading.data?.id;
+      let queued: boolean;
+      let row: Record<string, unknown>;
+      if (existingId) {
+        ({ queued } = await runWrite({
+          table: "service_chemistry_readings",
+          kind: "update",
+          rowId: existingId,
+          values: payload,
+        }));
+        row = { ...reading.data, ...payload };
       } else {
-        const { error } = await supabase.from("service_chemistry_readings").insert({
+        const values = {
           ...payload,
+          id: newId(),
           organization_id: orgId,
           service_record_id: serviceId,
           pool_id: poolId,
           reading_date: date,
-        });
-        if (error) throw error;
+        };
+        ({ queued } = await runWrite({
+          table: "service_chemistry_readings",
+          kind: "insert",
+          values,
+        }));
+        row = values;
       }
+      queryClient.setQueryData(["service-chemistry", serviceId], row);
+      return queued;
     },
-    onSuccess: async () => {
-      toast.success("Water chemistry saved.");
-      await queryClient.invalidateQueries({ queryKey: ["service-chemistry", serviceId] });
+    onSuccess: async (queued) => {
+      toast.success(queued ? "Readings saved on this phone — will sync later." : "Water chemistry saved.");
+      if (!queued)
+        await queryClient.invalidateQueries({ queryKey: ["service-chemistry", serviceId] });
     },
     onError: (e) => toast.error(friendlyError(e, "We couldn't save the readings.")),
   });
@@ -619,32 +650,50 @@ function Chemicals({
     },
   });
 
+  const key = ["service-chemicals", serviceId];
   const add = useMutation({
     mutationFn: async () => {
-      const { error } = await supabase.from("service_chemical_usage").insert({
-        organization_id: orgId,
-        service_record_id: serviceId,
-        pool_id: poolId,
-        chemical_name: name,
-        quantity: Number(quantity),
-        unit,
+      const id = newId();
+      const { queued } = await runWrite({
+        table: "service_chemical_usage",
+        kind: "insert",
+        values: {
+          id,
+          organization_id: orgId,
+          service_record_id: serviceId,
+          pool_id: poolId,
+          chemical_name: name,
+          quantity: Number(quantity),
+          unit,
+        },
       });
-      if (error) throw error;
+      queryClient.setQueryData(key, (old: unknown[] | undefined) => [
+        ...(old ?? []),
+        { id, chemical_name: name, quantity: Number(quantity), unit },
+      ]);
+      return queued;
     },
-    onSuccess: async () => {
+    onSuccess: async (queued) => {
       setQuantity("");
-      await queryClient.invalidateQueries({ queryKey: ["service-chemicals", serviceId] });
+      if (!queued) await queryClient.invalidateQueries({ queryKey: key });
     },
     onError: (e) => toast.error(friendlyError(e, "We couldn't add that chemical.")),
   });
 
   const remove = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from("service_chemical_usage").delete().eq("id", id);
-      if (error) throw error;
+      const { queued } = await runWrite({
+        table: "service_chemical_usage",
+        kind: "delete",
+        rowId: id,
+      });
+      queryClient.setQueryData(key, (old: { id: string }[] | undefined) =>
+        (old ?? []).filter((r) => r.id !== id),
+      );
+      return queued;
     },
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["service-chemicals", serviceId] });
+    onSuccess: async (queued) => {
+      if (!queued) await queryClient.invalidateQueries({ queryKey: key });
     },
     onError: (e) => toast.error(friendlyError(e, "We couldn't remove that entry.")),
   });
@@ -763,32 +812,51 @@ function Equipment({
     },
   });
 
+  const key = ["service-equipment", serviceId];
   const add = useMutation({
     mutationFn: async () => {
-      const { error } = await supabase.from("service_equipment_observations").insert({
+      const id = newId();
+      const values = {
+        id,
         organization_id: orgId,
         service_record_id: serviceId,
         pool_id: poolId,
         equipment_type: type,
         condition,
         notes: note.trim() || null,
+      };
+      const { queued } = await runWrite({
+        table: "service_equipment_observations",
+        kind: "insert",
+        values,
       });
-      if (error) throw error;
+      queryClient.setQueryData(key, (old: unknown[] | undefined) => [
+        ...(old ?? []),
+        { id, equipment_type: type, condition, notes: values.notes },
+      ]);
+      return queued;
     },
-    onSuccess: async () => {
+    onSuccess: async (queued) => {
       setNote("");
-      await queryClient.invalidateQueries({ queryKey: ["service-equipment", serviceId] });
+      if (!queued) await queryClient.invalidateQueries({ queryKey: key });
     },
     onError: (e) => toast.error(friendlyError(e, "We couldn't save that observation.")),
   });
 
   const remove = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from("service_equipment_observations").delete().eq("id", id);
-      if (error) throw error;
+      const { queued } = await runWrite({
+        table: "service_equipment_observations",
+        kind: "delete",
+        rowId: id,
+      });
+      queryClient.setQueryData(key, (old: { id: string }[] | undefined) =>
+        (old ?? []).filter((r) => r.id !== id),
+      );
+      return queued;
     },
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["service-equipment", serviceId] });
+    onSuccess: async (queued) => {
+      if (!queued) await queryClient.invalidateQueries({ queryKey: key });
     },
     onError: (e) => toast.error(friendlyError(e, "We couldn't remove that observation.")),
   });
@@ -905,20 +973,25 @@ function Notes({
     setForm({ notes: internal ?? "", customer: customerVisible ?? "" });
   }, [internal, customerVisible]);
 
+  const queryClient = useQueryClient();
   const save = useMutation({
     mutationFn: async () => {
-      const { error } = await supabase
-        .from("service_records")
-        .update({
-          notes: form.notes.trim() || null,
-          customer_visible_notes: form.customer.trim() || null,
-        })
-        .eq("id", serviceId);
-      if (error) throw error;
+      const values = {
+        notes: form.notes.trim() || null,
+        customer_visible_notes: form.customer.trim() || null,
+      };
+      const { queued } = await runWrite({
+        table: "service_records",
+        kind: "update",
+        rowId: serviceId,
+        values,
+      });
+      patchServiceCache(queryClient, serviceId, values);
+      return queued;
     },
-    onSuccess: async () => {
-      toast.success("Notes saved.");
-      await onSaved();
+    onSuccess: async (queued) => {
+      toast.success(queued ? "Notes saved on this phone — will sync later." : "Notes saved.");
+      if (!queued) await onSaved();
     },
     onError: (e) => toast.error(friendlyError(e, "We couldn't save those notes.")),
   });
@@ -983,18 +1056,23 @@ function SkipDialog({
   const [reason, setReason] = useState("no_access");
   const [note, setNote] = useState("");
 
+  const queryClient = useQueryClient();
   const save = useMutation({
     mutationFn: async () => {
-      const { error } = await supabase
-        .from("service_records")
-        .update({ status: "skipped", skip_reason: reason, skip_note: note.trim() || null })
-        .eq("id", serviceId);
-      if (error) throw error;
+      const values = { status: "skipped", skip_reason: reason, skip_note: note.trim() || null };
+      const { queued } = await runWrite({
+        table: "service_records",
+        kind: "update",
+        rowId: serviceId,
+        values,
+      });
+      patchServiceCache(queryClient, serviceId, values);
+      return queued;
     },
-    onSuccess: async () => {
-      toast.success("Visit marked as skipped.");
+    onSuccess: async (queued) => {
+      toast.success(queued ? "Skipped — will sync when you have signal." : "Visit marked as skipped.");
       onOpenChange(false);
-      await onSaved();
+      if (!queued) await onSaved();
     },
     onError: (e) => toast.error(friendlyError(e, "We couldn't skip this visit.")),
   });
