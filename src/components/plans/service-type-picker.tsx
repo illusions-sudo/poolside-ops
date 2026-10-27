@@ -1,5 +1,6 @@
 import { Bath, Waves } from "lucide-react";
 
+import { SERVICE_TYPE_LABELS } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
 export type ServiceType = "pool" | "spa";
