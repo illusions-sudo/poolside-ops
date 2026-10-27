@@ -3,7 +3,7 @@
   "name": "Poolside Ops — Pool Service",
   "short_name": "Poolside Ops",
   "description": "Run your pool service company: today's stops, service notes, water chemistry, customers and invoices.",
-  "start_url": "/",
+  "start_url": "/dashboard",
   "scope": "/",
   "display": "standalone",
   "display_override": ["standalone"],
