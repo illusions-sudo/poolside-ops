@@ -2,7 +2,9 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import {
   Beaker,
+  CalendarClock,
   CheckCircle2,
+  XCircle,
   ClipboardList,
   Clock,
   Loader2,
@@ -19,6 +21,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { ServicePhotos } from "@/components/services/service-photos";
+import { ConfirmDialog } from "@/components/shell/confirm-dialog";
 import { AppShell } from "@/components/shell/app-shell";
 import { EmptyState, ErrorState, LoadingRows } from "@/components/shell/empty-state";
 import { PageHeader } from "@/components/shell/page-header";
@@ -100,6 +103,10 @@ function ServiceDetailPage() {
   const queryClient = useQueryClient();
   const router = useRouter();
   const [skipOpen, setSkipOpen] = useState(false);
+  const [postponeOpen, setPostponeOpen] = useState(false);
+  const [cancelOpen, setCancelOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [newDate, setNewDate] = useState("");
 
   const invalidate = async () => {
     await queryClient.invalidateQueries({ queryKey: ["service", serviceId] });
@@ -165,6 +172,57 @@ function ServiceDetailPage() {
       router.invalidate();
     },
     onError: (e) => toast.error(friendlyError(e, "We couldn't update this visit.")),
+  });
+
+  const postpone = useMutation({
+    mutationFn: async (date: string) => {
+      const { error } = await supabase
+        .from("service_records")
+        .update({ service_date: date, status: "scheduled", started_at: null })
+        .eq("id", serviceId);
+      if (error) throw error;
+      // Take it off the old day's route; it can be placed on the new day's route.
+      await supabase.from("route_stops").delete().eq("service_record_id", serviceId);
+    },
+    onSuccess: async () => {
+      toast.success("Visit moved.");
+      setPostponeOpen(false);
+      await invalidate();
+      router.invalidate();
+    },
+    onError: (e) => toast.error(friendlyError(e, "We couldn't move this visit.")),
+  });
+
+  const cancelVisit = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase
+        .from("service_records")
+        .update({ status: "cancelled" })
+        .eq("id", serviceId);
+      if (error) throw error;
+    },
+    onSuccess: async () => {
+      toast.success("Visit cancelled.");
+      setCancelOpen(false);
+      await invalidate();
+      router.invalidate();
+    },
+    onError: (e) => toast.error(friendlyError(e, "We couldn't cancel this visit.")),
+  });
+
+  const deleteVisit = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase.rpc("delete_service_record", { p_service_id: serviceId });
+      if (error) throw error;
+    },
+    onSuccess: async () => {
+      toast.success("Visit deleted.");
+      setDeleteOpen(false);
+      queryClient.removeQueries({ queryKey: ["service", serviceId] });
+      await queryClient.invalidateQueries();
+      void router.navigate({ to: "/schedule" });
+    },
+    onError: (e) => toast.error(friendlyError(e, "We couldn't delete this visit.")),
   });
 
   return (
@@ -248,6 +306,33 @@ function ServiceDetailPage() {
                   <SkipForward className="mr-2 size-4" /> Skip visit
                 </Button>
               )}
+              {isAdmin && s.status !== "completed" ? (
+                <>
+                  {!closed ? (
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        setNewDate(s.service_date);
+                        setPostponeOpen(true);
+                      }}
+                    >
+                      <CalendarClock className="mr-2 size-4" /> Postpone
+                    </Button>
+                  ) : null}
+                  {!closed ? (
+                    <Button variant="outline" onClick={() => setCancelOpen(true)}>
+                      <XCircle className="mr-2 size-4" /> Cancel visit
+                    </Button>
+                  ) : null}
+                  <Button
+                    variant="outline"
+                    className="text-destructive hover:text-destructive"
+                    onClick={() => setDeleteOpen(true)}
+                  >
+                    <Trash2 className="mr-2 size-4" /> Delete
+                  </Button>
+                </>
+              ) : null}
               <span className="ml-auto flex items-center gap-3 text-xs text-muted-foreground">
                 <span className="flex items-center gap-1.5">
                   <Clock className="size-3.5" />
@@ -393,6 +478,53 @@ function ServiceDetailPage() {
             onOpenChange={setSkipOpen}
             serviceId={serviceId}
             onSaved={invalidate}
+          />
+          <Dialog open={postponeOpen} onOpenChange={setPostponeOpen}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Postpone visit</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-2">
+                <Label htmlFor="postpone-date">New date</Label>
+                <Input
+                  id="postpone-date"
+                  type="date"
+                  value={newDate}
+                  onChange={(e) => setNewDate(e.target.value)}
+                />
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setPostponeOpen(false)}>
+                  Back
+                </Button>
+                <Button
+                  disabled={!newDate || newDate === s.service_date || postpone.isPending}
+                  onClick={() => postpone.mutate(newDate)}
+                >
+                  {postpone.isPending ? <Loader2 className="mr-2 size-4 animate-spin" /> : null}
+                  Move visit
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+          <ConfirmDialog
+            open={cancelOpen}
+            onOpenChange={setCancelOpen}
+            title="Cancel this visit?"
+            description="It stays in the history marked Cancelled. You can reopen it later."
+            confirmLabel="Cancel visit"
+            onConfirm={() => cancelVisit.mutate()}
+            pending={cancelVisit.isPending}
+          />
+          <ConfirmDialog
+            open={deleteOpen}
+            onOpenChange={setDeleteOpen}
+            title="Delete this visit for good?"
+            description="It's removed from the schedule and route. This can't be undone."
+            confirmLabel="Delete visit"
+            destructive
+            onConfirm={() => deleteVisit.mutate()}
+            pending={deleteVisit.isPending}
           />
         </>
       )}
